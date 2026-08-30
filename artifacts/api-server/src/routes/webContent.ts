@@ -102,9 +102,64 @@ async function attachCategoryNames(rows: (typeof webProductsTable.$inferSelect)[
     ? await db.select().from(webCategoriesTable).where(inArray(webCategoriesTable.id, categoryIds))
     : [];
   const byId = new Map(categories.map((c) => [c.id, c.name]));
+
+  // Product summaries are also used by the public catalogue filters. Keep the
+  // values derived from the CMS detail tables so new products do not require a
+  // second, hard-coded filter configuration in the website.
+  const productIds = rows.map((r) => r.id);
+  if (productIds.length === 0) return [];
+  const [keyRanges, groups, modelRows] = await Promise.all([
+    db.select().from(webProductKeyRangeTable).where(inArray(webProductKeyRangeTable.productId, productIds)),
+    db.select().from(webProductSpecGroupsTable).where(inArray(webProductSpecGroupsTable.productId, productIds)),
+    db.select().from(webProductModelRangeRowsTable).where(inArray(webProductModelRangeRowsTable.productId, productIds)),
+  ]);
+  const groupIds = groups.map((group) => group.id);
+  const specs = groupIds.length
+    ? await db.select().from(webProductSpecsTable).where(inArray(webProductSpecsTable.groupId, groupIds))
+    : [];
+  const groupById = new Map(groups.map((group) => [group.id, group]));
+  const toNumbers = (value: string) => [...value.matchAll(/\d[\d,.]*/g)]
+    .map((match) => Number(match[0].replace(/,/g, "")))
+    .filter((value) => Number.isFinite(value));
+  const rangeFor = (values: string[]) => {
+    const numbers = values.flatMap(toNumbers);
+    return numbers.length >= 2 ? { min: Math.min(...numbers), max: Math.max(...numbers) } : null;
+  };
+
   return rows.map((r) => ({
     id: r.id, categoryId: r.categoryId, categoryName: r.categoryId ? byId.get(r.categoryId) ?? null : null,
     name: r.name, slug: r.slug, series: r.series, tagline: r.tagline, mainImageUrl: r.mainImageUrl,
+    productType: (() => {
+      const productTypeSpec = specs.find((spec) =>
+        spec.groupId && groupById.get(spec.groupId)?.productId === r.id
+        && spec.label.toLowerCase().includes("product type"),
+      );
+      return productTypeSpec?.value ?? (r.categoryId ? byId.get(r.categoryId) ?? null : null);
+    })(),
+    powerRange: (() => {
+      const values = [
+        ...keyRanges.filter((range) => range.productId === r.id && range.label.toLowerCase().includes("power")).map((range) => range.label),
+        ...specs.filter((spec) =>
+          spec.groupId && groupById.get(spec.groupId)?.productId === r.id
+          && spec.label.toLowerCase().includes("power"),
+        ).map((spec) => spec.value),
+      ];
+      return rangeFor(values);
+    })(),
+    ratioRange: (() => {
+      const values = [
+        ...keyRanges.filter((range) => range.productId === r.id && range.label.toLowerCase().includes("ratio")).map((range) => range.label),
+        ...specs.filter((spec) =>
+          spec.groupId && groupById.get(spec.groupId)?.productId === r.id
+          && spec.label.toLowerCase().includes("ratio"),
+        ).map((spec) => spec.value),
+      ];
+      const headerIndex = (r.modelRangeHeaders ?? []).findIndex((header) => header.toLowerCase().includes("ratio"));
+      if (headerIndex >= 0) {
+        values.push(...modelRows.filter((row) => row.productId === r.id).map((row) => row.cells[headerIndex] ?? ""));
+      }
+      return rangeFor(values);
+    })(),
     status: r.status, featured: r.featured, displayOrder: r.displayOrder, createdAt: r.createdAt, updatedAt: r.updatedAt,
   }));
 }

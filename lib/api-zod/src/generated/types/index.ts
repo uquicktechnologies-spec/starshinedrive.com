@@ -133,4 +133,6 @@ export * from './webProductMountingVariantItem';
 export * from './webProductSpecGroup';
 export * from './webProductSpecItem';
 export * from './webProductSummary';
+export * from './webProductSummaryPowerRange';
+export * from './webProductSummaryRatioRange';
 export * from './webProductUpdate';

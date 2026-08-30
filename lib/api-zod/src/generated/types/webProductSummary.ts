@@ -5,6 +5,8 @@
  * Starshine Drive website and internal CRM API
  * OpenAPI spec version: 0.1.0
  */
+import type { WebProductSummaryPowerRange } from './webProductSummaryPowerRange';
+import type { WebProductSummaryRatioRange } from './webProductSummaryRatioRange';
 
 export interface WebProductSummary {
   id: number;
@@ -20,6 +22,12 @@ export interface WebProductSummary {
   tagline?: string | null;
   /** @nullable */
   mainImageUrl?: string | null;
+  /** @nullable */
+  productType?: string | null;
+  /** @nullable */
+  powerRange?: WebProductSummaryPowerRange;
+  /** @nullable */
+  ratioRange?: WebProductSummaryRatioRange;
   status: string;
   featured: boolean;
   displayOrder: number;

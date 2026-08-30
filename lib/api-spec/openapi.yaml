@@ -2487,6 +2487,19 @@ components:
         series: { type: ["string", "null"] }
         tagline: { type: ["string", "null"] }
         mainImageUrl: { type: ["string", "null"] }
+        productType: { type: ["string", "null"] }
+        powerRange:
+          type: ["object", "null"]
+          required: [min, max]
+          properties:
+            min: { type: number }
+            max: { type: number }
+        ratioRange:
+          type: ["object", "null"]
+          required: [min, max]
+          properties:
+            min: { type: number }
+            max: { type: number }
         status: { type: string }
         featured: { type: boolean }
         displayOrder: { type: integer }

@@ -1300,6 +1300,22 @@ export interface WebCategoryUpdate {
   ogImageUrl?: string;
 }
 
+/**
+ * @nullable
+ */
+export type WebProductSummaryPowerRange = {
+  min: number;
+  max: number;
+} | null;
+
+/**
+ * @nullable
+ */
+export type WebProductSummaryRatioRange = {
+  min: number;
+  max: number;
+} | null;
+
 export interface WebProductSummary {
   id: number;
   /** @nullable */
@@ -1314,6 +1330,12 @@ export interface WebProductSummary {
   tagline?: string | null;
   /** @nullable */
   mainImageUrl?: string | null;
+  /** @nullable */
+  productType?: string | null;
+  /** @nullable */
+  powerRange?: WebProductSummaryPowerRange;
+  /** @nullable */
+  ratioRange?: WebProductSummaryRatioRange;
   status: string;
   featured: boolean;
   displayOrder: number;

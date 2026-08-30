@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useSEO, injectJSONLD, removeJSONLD } from "@/lib/seo";
 import { Link, useSearch } from "wouter";
-import { CheckSquare, ArrowRight, ChevronRight, PackageSearch } from "lucide-react";
+import { CheckSquare, ArrowRight, ChevronRight, Filter, PackageSearch, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -10,9 +10,189 @@ import heroImg from "@assets/generated_images/hero-lineup.webp";
 import { useListPublicWebCategories, useListPublicWebProducts } from "@workspace/api-client-react";
 import type { WebProductSummary } from "@workspace/api-client-react";
 import type { UseQueryOptions } from "@tanstack/react-query";
+import { Slider } from "@/components/ui/slider";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 function storageUrl(path: string) {
   return `/api/storage${path}`;
+}
+
+type FilterProduct = WebProductSummary & {
+  productType?: string | null;
+  powerRange?: { min: number; max: number } | null;
+  ratioRange?: { min: number; max: number } | null;
+};
+
+type FilterState = {
+  productType: string;
+  power: [number, number];
+  ratio: [number, number];
+};
+
+type NumericRange = {
+  min: number;
+  max: number;
+};
+
+const FALLBACK_POWER_RANGE: NumericRange = { min: 0, max: 160 };
+const FALLBACK_RATIO_RANGE: NumericRange = { min: 1, max: 100 };
+
+function getNumericBounds(products: FilterProduct[], key: "powerRange" | "ratioRange", fallback: NumericRange): NumericRange {
+  const ranges = products.map((product) => product[key]).filter((range): range is NumericRange => !!range);
+  if (ranges.length === 0) return fallback;
+  return {
+    min: Math.min(...ranges.map((range) => range.min)),
+    max: Math.max(...ranges.map((range) => range.max)),
+  };
+}
+
+function formatNumber(value: number) {
+  return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function displayProductType(value: string) {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("helical")) return "Helical";
+  if (normalized.includes("worm")) return "Worm";
+  if (normalized.includes("planetary")) return "Planetary";
+  if (normalized.includes("cycloidal")) return "Cycloidal";
+  if (normalized.includes("bevel")) return "Bevel";
+  if (normalized.includes("gear")) return value.replace(/\bgear(box|boxes)?\b/gi, "").replace(/\s+/g, " ").trim();
+  return value;
+}
+
+function ProductFilters({
+  products,
+  state,
+  powerBounds,
+  ratioBounds,
+  onChange,
+  onClear,
+}: {
+  products: FilterProduct[];
+  state: FilterState;
+  powerBounds: NumericRange;
+  ratioBounds: NumericRange;
+  onChange: (next: Partial<FilterState>) => void;
+  onClear: () => void;
+}) {
+  const types = [...new Set(products.map((product) => product.productType ?? product.categoryName).filter(Boolean))]
+    .map((type) => ({ value: type as string, label: displayProductType(type as string) }));
+  const hasRatioData = products.some((product) => product.ratioRange);
+  const hasActiveFilters = state.productType !== "all"
+    || state.power[0] !== powerBounds.min
+    || state.power[1] !== powerBounds.max
+    || state.ratio[0] !== ratioBounds.min
+    || state.ratio[1] !== ratioBounds.max;
+
+  return (
+    <div className="space-y-7">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold text-primary">Refine results</p>
+          <p className="text-xs text-gray-500 mt-1">Find the right drive faster.</p>
+        </div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:text-primary transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" /> Clear
+          </button>
+        )}
+      </div>
+
+      <fieldset>
+        <legend className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Product Type</legend>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => onChange({ productType: "all" })}
+            aria-pressed={state.productType === "all"}
+            className={cn(
+              "w-full rounded-sm border px-3 py-2 text-left text-sm transition-colors",
+              state.productType === "all" ? "border-primary bg-primary/5 text-primary font-semibold" : "border-gray-200 text-gray-600 hover:border-primary/40",
+            )}
+          >
+            All product types
+          </button>
+          {types.map((type) => (
+            <button
+              key={type.value}
+              type="button"
+              onClick={() => onChange({ productType: type.value })}
+              aria-pressed={state.productType === type.value}
+              className={cn(
+                "w-full rounded-sm border px-3 py-2 text-left text-sm transition-colors",
+                state.productType === type.value ? "border-primary bg-primary/5 text-primary font-semibold" : "border-gray-200 text-gray-600 hover:border-primary/40",
+              )}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Power range</legend>
+        <div className="flex items-center justify-between text-xs font-semibold text-primary mb-3">
+          <span>{formatNumber(state.power[0])} kW</span>
+          <span>{formatNumber(state.power[1])} kW</span>
+        </div>
+        <Slider
+          min={powerBounds.min}
+          max={Math.max(powerBounds.max, powerBounds.min + 1)}
+          step={0.01}
+          value={state.power}
+          onValueChange={(value) => {
+            if (value.length === 2) onChange({ power: [value[0], value[1]] });
+          }}
+          aria-label="Power range in kilowatts"
+        />
+        <div className="flex justify-between text-[11px] text-gray-400 mt-2">
+          <span>{formatNumber(powerBounds.min)} kW</span>
+          <span>{formatNumber(powerBounds.max)} kW</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Gear ratio</legend>
+        {hasRatioData ? (
+          <>
+            <div className="flex items-center justify-between text-xs font-semibold text-primary mb-3">
+              <span>1:{formatNumber(state.ratio[0])}</span>
+              <span>1:{formatNumber(state.ratio[1])}</span>
+            </div>
+            <Slider
+              min={ratioBounds.min}
+              max={Math.max(ratioBounds.max, ratioBounds.min + 1)}
+              step={0.01}
+              value={state.ratio}
+              onValueChange={(value) => {
+                if (value.length === 2) onChange({ ratio: [value[0], value[1]] });
+              }}
+              aria-label="Gear ratio range"
+            />
+            <div className="flex justify-between text-[11px] text-gray-400 mt-2">
+              <span>1:{formatNumber(ratioBounds.min)}</span>
+              <span>1:{formatNumber(ratioBounds.max)}</span>
+            </div>
+            {products.some((product) => !product.ratioRange) && (
+              <p className="text-[11px] leading-relaxed text-gray-400 mt-3">
+                Products without a published ratio are omitted when this range is narrowed.
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="rounded-sm border border-dashed border-gray-200 bg-gray-50 px-3 py-3">
+            <p className="text-xs font-semibold text-gray-600">Ratio data is not listed for this category yet.</p>
+            <p className="text-[11px] leading-relaxed text-gray-400 mt-1">Contact our engineers for ratio selection support.</p>
+          </div>
+        )}
+      </fieldset>
+    </div>
+  );
 }
 
 export default function Products() {
@@ -56,6 +236,46 @@ export default function Products() {
     activeCategory ? { categorySlug: activeCategory.slug } : undefined,
     { query: { enabled: !!activeCategory } as UseQueryOptions<WebProductSummary[]> },
   );
+  const filterProducts = (categoryProducts ?? []) as FilterProduct[];
+  const powerBounds = useMemo(() => getNumericBounds(filterProducts, "powerRange", FALLBACK_POWER_RANGE), [filterProducts]);
+  const ratioBounds = useMemo(() => getNumericBounds(filterProducts, "ratioRange", FALLBACK_RATIO_RANGE), [filterProducts]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    productType: "all",
+    power: [FALLBACK_POWER_RANGE.min, FALLBACK_POWER_RANGE.max],
+    ratio: [FALLBACK_RATIO_RANGE.min, FALLBACK_RATIO_RANGE.max],
+  });
+
+  useEffect(() => {
+    setFilters((current) => ({
+      ...current,
+      power: [powerBounds.min, powerBounds.max],
+      ratio: [ratioBounds.min, ratioBounds.max],
+    }));
+  }, [powerBounds.min, powerBounds.max, ratioBounds.min, ratioBounds.max]);
+
+  useEffect(() => {
+    setFilters((current) => ({ ...current, productType: "all" }));
+  }, [activeCategory?.slug]);
+
+  const filteredProducts = useMemo(() => filterProducts.filter((product) => {
+    const typeMatches = filters.productType === "all"
+      || (product.productType ?? product.categoryName) === filters.productType;
+    const powerMatches = !product.powerRange
+      ? filters.power[0] === powerBounds.min && filters.power[1] === powerBounds.max
+      : product.powerRange.max >= filters.power[0] && product.powerRange.min <= filters.power[1];
+    const ratioMatches = !product.ratioRange
+      ? filters.ratio[0] === ratioBounds.min && filters.ratio[1] === ratioBounds.max
+      : product.ratioRange.max >= filters.ratio[0] && product.ratioRange.min <= filters.ratio[1];
+    return typeMatches && powerMatches && ratioMatches;
+  }), [filterProducts, filters, powerBounds, ratioBounds]);
+
+  const updateFilters = (next: Partial<FilterState>) => setFilters((current) => ({ ...current, ...next }));
+  const clearFilters = () => setFilters({
+    productType: "all",
+    power: [powerBounds.min, powerBounds.max],
+    ratio: [ratioBounds.min, ratioBounds.max],
+  });
 
   // Scroll active mobile tab into view
   useEffect(() => {
@@ -192,26 +412,83 @@ export default function Products() {
                 )}
               </div>
 
+              {/* Catalogue filters */}
+              <div className="flex items-center justify-between gap-4 mb-6 pb-5 border-b border-gray-100">
+                <p className="text-sm text-gray-500">
+                  Showing <span className="font-bold text-primary">{filteredProducts.length}</span> of {filterProducts.length} products
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(true)}
+                  className="md:hidden inline-flex items-center gap-2 border border-primary/20 text-primary rounded-sm px-3 py-2 text-sm font-semibold"
+                >
+                  <Filter className="w-4 h-4" /> Filters
+                </button>
+              </div>
+
+              <aside className="hidden md:block border border-gray-200 rounded-sm p-5 mb-8 bg-white">
+                <ProductFilters
+                  products={filterProducts}
+                  state={filters}
+                  powerBounds={powerBounds}
+                  ratioBounds={ratioBounds}
+                  onChange={updateFilters}
+                  onClear={clearFilters}
+                />
+              </aside>
+
+              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <SheetContent side="right" className="w-[min(88vw,380px)] overflow-y-auto">
+                  <SheetHeader className="text-left mb-8">
+                    <SheetTitle className="flex items-center gap-2 text-primary">
+                      <SlidersHorizontal className="w-5 h-5" /> Filter products
+                    </SheetTitle>
+                    <SheetDescription>Adjust the filters to narrow the catalogue. Results update instantly.</SheetDescription>
+                  </SheetHeader>
+                  <ProductFilters
+                    products={filterProducts}
+                    state={filters}
+                    powerBounds={powerBounds}
+                    ratioBounds={ratioBounds}
+                    onChange={updateFilters}
+                    onClear={clearFilters}
+                  />
+                  <Button className="w-full bg-primary hover:bg-accent mt-8" onClick={() => setFiltersOpen(false)}>
+                    View {filteredProducts.length} result{filteredProducts.length === 1 ? "" : "s"}
+                  </Button>
+                </SheetContent>
+              </Sheet>
+
               {/* Product cards */}
               {productsLoading && (
                 <p className="text-gray-400 text-sm">Loading products…</p>
               )}
 
-              {!productsLoading && (!categoryProducts || categoryProducts.length === 0) && (
+              {!productsLoading && filterProducts.length === 0 && (
                 <div className="py-16 text-center bg-gray-50 rounded-lg border border-gray-100">
                   <PackageSearch className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500 text-sm">No products published in this category yet.</p>
                 </div>
               )}
 
-              {!productsLoading && categoryProducts && categoryProducts.length > 0 && (
+              {!productsLoading && filterProducts.length > 0 && filteredProducts.length === 0 && (
+                <div className="py-16 text-center bg-gray-50 rounded-lg border border-gray-100">
+                  <Filter className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-600 font-semibold mb-2">No products match these filters.</p>
+                  <button type="button" onClick={clearFilters} className="text-accent text-sm font-semibold hover:text-primary">
+                    Clear filters and show all products
+                  </button>
+                </div>
+              )}
+
+              {!productsLoading && filteredProducts.length > 0 && (
                 <div className={cn(
                   "grid gap-5",
-                  categoryProducts.length === 1 ? "grid-cols-1 max-w-lg" :
-                  categoryProducts.length === 2 ? "grid-cols-1 sm:grid-cols-2" :
+                  filteredProducts.length === 1 ? "grid-cols-1 max-w-lg" :
+                  filteredProducts.length === 2 ? "grid-cols-1 sm:grid-cols-2" :
                   "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
                 )}>
-                  {categoryProducts.map((product) => (
+                  {filteredProducts.map((product) => (
                     <div
                       key={product.slug}
                       className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"

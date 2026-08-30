@@ -2421,6 +2421,15 @@ export const GetPublicWebCategoryResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -2443,6 +2452,15 @@ export const ListPublicWebProductsResponseItem = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -2532,6 +2550,15 @@ export const GetPublicWebProductResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -2684,6 +2711,15 @@ export const ListWebProductsResponseItem = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -2792,6 +2828,15 @@ export const CreateWebProductResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -2899,6 +2944,15 @@ export const GetWebProductResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3032,6 +3086,15 @@ export const UpdateWebProductResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3158,6 +3221,15 @@ export const ReplaceWebProductKeyRangeResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3280,6 +3352,15 @@ export const ReplaceWebProductSpecGroupsResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3396,6 +3477,15 @@ export const ReplaceWebProductFeaturesResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3513,6 +3603,15 @@ export const ReplaceWebProductApplicationsResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3630,6 +3729,15 @@ export const ReplaceWebProductImagesResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3748,6 +3856,15 @@ export const ReplaceWebProductFaqsResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3859,6 +3976,15 @@ export const ReplaceWebProductRelatedResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -3976,6 +4102,15 @@ export const ReplaceWebProductConfigInputTypesResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -4094,6 +4229,15 @@ export const ReplaceWebProductMountingVariantsResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -4206,6 +4350,15 @@ export const ReplaceWebProductModelRangeResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -4326,6 +4479,15 @@ export const ExportWebContentResponse = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
@@ -4447,6 +4609,15 @@ export const ImportWebContentBody = zod.object({
   "series": zod.string().nullish(),
   "tagline": zod.string().nullish(),
   "mainImageUrl": zod.string().nullish(),
+  "productType": zod.string().nullish(),
+  "powerRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
+  "ratioRange": zod.object({
+  "min": zod.number(),
+  "max": zod.number()
+}).nullish(),
   "status": zod.string(),
   "featured": zod.boolean(),
   "displayOrder": zod.int(),
