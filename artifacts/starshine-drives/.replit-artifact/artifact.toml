@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Starshine Drive"
+description = "A pixel-faithful recreation of starshinedrives.com — an industrial gearbox and gear reducer manufacturer website. Features a hero slider, product catalog, solution pages, about section, certifications, and contact/quote form."
+version = "1.0.0"
+id = "artifacts/starshine-drives"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26060
+
+[services.development]
+run = "pnpm --filter @workspace/starshine-drives run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/starshine-drives", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/starshine-drives/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26060"
+BASE_PATH = "/"

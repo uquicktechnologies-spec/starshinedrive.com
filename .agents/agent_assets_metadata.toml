@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "2uvbjPXF8q6Tn8Cly2144"
+uri = "file://exports/starshine-code.zip"
+type = "unspecified"
+title = "Starshine Drive - Source Code"
+description = "Full project source (website + CRM + API server), excluding node_modules, .git, dist, and cache/attachment folders. ~1.9MB."
+
+[[outputs]]
+id = "xVcCsoFUzaxWuQOTZ9-Ep"
+uri = "file://exports/starshine-database.sql"
+type = "unspecified"
+title = "Starshine Drive - Database Export"
+description = "Full PostgreSQL dump (pg_dump) of the current database, including all CRM, customer, product, and quotation data. ~87KB."

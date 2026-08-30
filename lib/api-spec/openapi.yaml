@@ -1,0 +1,2870 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Starshine Drive website and internal CRM API
+servers:
+  - url: /api
+tags:
+  - name: health
+  - name: crm
+  - name: inquiries
+  - name: Storage
+    description: Object storage upload and serving endpoints.
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /inquiries:
+    post:
+      operationId: createInquiry
+      tags: [inquiries]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InquiryInput" }
+      responses:
+        "201":
+          description: Lead saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+  /storage/uploads/request-url:
+    post:
+      tags: [Storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      description: |
+        Returns a presigned GCS URL for direct upload. The client sends JSON
+        metadata here, then uploads the file directly to the returned URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadUrlRequest'
+      responses:
+        '200':
+          description: Presigned upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Failed to generate upload URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [Storage]
+      operationId: getPublicObject
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      description: |
+        Unconditionally public — no authentication or ACL checks.
+        Searches PUBLIC_OBJECT_SEARCH_PATHS for the given file path.
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Relative file path within the public search paths.
+      responses:
+        '200':
+          description: Object content streamed with correct Content-Type.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Failed to serve public object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /storage/objects/{objectPath}:
+    get:
+      tags: [Storage]
+      operationId: getStorageObject
+      summary: Serve an object entity from PRIVATE_OBJECT_DIR
+      description: |
+        Serves object entities uploaded via presigned URLs. These can optionally
+        be protected with authentication or ACL checks based on the use case.
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Object path within the private object dir (e.g. `uploads/some-uuid`).
+      responses:
+        '200':
+          description: Object content streamed with correct Content-Type.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Object not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Failed to serve object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /crm/dashboard:
+    get:
+      operationId: getCrmDashboard
+      tags: [crm]
+      responses:
+        "200":
+          description: CRM dashboard summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+  /crm/customers:
+    get:
+      operationId: listCustomers
+      tags: [crm]
+      responses:
+        "200":
+          description: Customer list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Customer" }
+    post:
+      operationId: createCustomer
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerInput" }
+      responses:
+        "201":
+          description: Customer created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+  /crm/customers/{id}:
+    patch:
+      operationId: updateCustomer
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerUpdate" }
+      responses:
+        "200":
+          description: Customer updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+  /crm/inquiries:
+    get:
+      operationId: listInquiries
+      tags: [crm]
+      responses:
+        "200":
+          description: Website leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Inquiry" }
+  /crm/inquiries/{id}:
+    patch:
+      operationId: updateInquiry
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InquiryUpdate" }
+      responses:
+        "200":
+          description: Lead updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+  /crm/quotations:
+    get:
+      operationId: listQuotations
+      tags: [crm]
+      responses:
+        "200":
+          description: Quotation list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Quotation" }
+    post:
+      operationId: createQuotation
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuotationInput" }
+      responses:
+        "201":
+          description: Quotation created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quotation" }
+  /crm/quotations/{id}:
+    patch:
+      operationId: updateQuotation
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuotationUpdate" }
+      responses:
+        "200":
+          description: Quotation updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quotation" }
+  /crm/products:
+    get:
+      operationId: listProducts
+      tags: [crm]
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Product" }
+    post:
+      operationId: createProduct
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductInput" }
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+  /crm/products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+  /crm/products/bulk-min-stock:
+    post:
+      operationId: bulkSetProductMinStock
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BulkMinStockInput" }
+      responses:
+        "200":
+          description: Number of products updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BulkMinStockResult" }
+  /crm/sales-executives:
+    get:
+      operationId: listSalesExecutives
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/ActiveOnly" }]
+      responses:
+        "200":
+          description: Sales executive list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SalesExecutive" }
+    post:
+      operationId: createSalesExecutive
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SalesExecutiveInput" }
+      responses:
+        "201":
+          description: Sales executive created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesExecutive" }
+  /crm/sales-executives/{id}:
+    patch:
+      operationId: updateSalesExecutive
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SalesExecutiveUpdate" }
+      responses:
+        "200":
+          description: Sales executive updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesExecutive" }
+  /crm/me:
+    get:
+      operationId: getCurrentUser
+      tags: [crm]
+      responses:
+        "200":
+          description: Current staff user and role
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CurrentUser" }
+  /crm/staff-roles:
+    get:
+      operationId: listStaffRoles
+      tags: [crm]
+      responses:
+        "200":
+          description: Staff role list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StaffRole" }
+    post:
+      operationId: createStaffRole
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffRoleInput" }
+      responses:
+        "201":
+          description: Staff role created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffRole" }
+  /crm/staff-roles/{id}:
+    patch:
+      operationId: updateStaffRole
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffRoleUpdate" }
+      responses:
+        "200":
+          description: Staff role updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffRole" }
+  /crm/categories:
+    get:
+      operationId: listCategories
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/ActiveOnly" }]
+      responses:
+        "200":
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Category" }
+    post:
+      operationId: createCategory
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryInput" }
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+  /crm/categories/{id}:
+    patch:
+      operationId: updateCategory
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryUpdate" }
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+    delete:
+      operationId: deleteCategory
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Category deleted
+  /crm/sub-groups:
+    get:
+      operationId: listSubGroups
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/ActiveOnly" }]
+      responses:
+        "200":
+          description: Sub group list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SubGroup" }
+    post:
+      operationId: createSubGroup
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubGroupInput" }
+      responses:
+        "201":
+          description: Sub group created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubGroup" }
+  /crm/sub-groups/{id}:
+    patch:
+      operationId: updateSubGroup
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubGroupUpdate" }
+      responses:
+        "200":
+          description: Sub group updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubGroup" }
+    delete:
+      operationId: deleteSubGroup
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Sub group deleted
+  /crm/suppliers:
+    get:
+      operationId: listSuppliers
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/ActiveOnly" }]
+      responses:
+        "200":
+          description: Supplier list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Supplier" }
+    post:
+      operationId: createSupplier
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SupplierInput" }
+      responses:
+        "201":
+          description: Supplier created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Supplier" }
+  /crm/suppliers/{id}:
+    patch:
+      operationId: updateSupplier
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SupplierUpdate" }
+      responses:
+        "200":
+          description: Supplier updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Supplier" }
+  /crm/warehouses:
+    get:
+      operationId: listWarehouses
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/ActiveOnly" }]
+      responses:
+        "200":
+          description: Warehouse list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Warehouse" }
+    post:
+      operationId: createWarehouse
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WarehouseInput" }
+      responses:
+        "201":
+          description: Warehouse created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Warehouse" }
+  /crm/warehouses/{id}:
+    patch:
+      operationId: updateWarehouse
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WarehouseUpdate" }
+      responses:
+        "200":
+          description: Warehouse updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Warehouse" }
+  /crm/purchases:
+    get:
+      operationId: listPurchases
+      tags: [crm]
+      responses:
+        "200":
+          description: Purchase list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Purchase" }
+    post:
+      operationId: createPurchase
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PurchaseInput" }
+      responses:
+        "201":
+          description: Purchase created and stock increased
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Purchase" }
+  /crm/purchases/{id}:
+    patch:
+      operationId: updatePurchase
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PurchaseUpdate" }
+      responses:
+        "200":
+          description: Purchase updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Purchase" }
+    delete:
+      operationId: deletePurchase
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Purchase deleted and stock reverted
+  /crm/purchases/{id}/pdf:
+    get:
+      operationId: getPurchasePdf
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "200":
+          description: Purchase invoice PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+  /crm/sales:
+    get:
+      operationId: listSales
+      tags: [crm]
+      responses:
+        "200":
+          description: Sale list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Sale" }
+    post:
+      operationId: createSale
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SaleInput" }
+      responses:
+        "201":
+          description: Sale created and stock decreased
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Sale" }
+        "409":
+          description: Insufficient stock for one or more items
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+  /crm/sales/{id}:
+    patch:
+      operationId: updateSale
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SaleUpdate" }
+      responses:
+        "200":
+          description: Sale updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Sale" }
+    delete:
+      operationId: deleteSale
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Sale deleted and stock reverted
+  /crm/sales/{id}/pdf:
+    get:
+      operationId: getSalePdf
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "200":
+          description: Sale invoice PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+  /crm/stock/levels:
+    get:
+      operationId: listStockLevels
+      tags: [crm]
+      responses:
+        "200":
+          description: Current stock levels per product/warehouse
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockLevel" }
+  /crm/stock/pending:
+    get:
+      operationId: getStockPending
+      tags: [crm]
+      responses:
+        "200":
+          description: Low/out-of-stock products
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockLevel" }
+  /crm/stock/history/{productId}:
+    get:
+      operationId: getStockHistory
+      tags: [crm]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Stock movement history for a product
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockHistoryEntry" }
+  /crm/stock/adjustments:
+    post:
+      operationId: createStockAdjustment
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StockAdjustmentInput" }
+      responses:
+        "201":
+          description: Stock adjusted
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockLevel" }
+        "409":
+          description: Insufficient stock for decrease/transfer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+  /crm/stock/dashboard:
+    get:
+      operationId: getStockDashboard
+      tags: [crm]
+      responses:
+        "200":
+          description: Stock dashboard summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StockDashboard" }
+  /crm/stock/notifications:
+    get:
+      operationId: listStockNotifications
+      tags: [crm]
+      responses:
+        "200":
+          description: Derived stock notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StockNotification" }
+  /crm/stock/search:
+    get:
+      operationId: searchStock
+      tags: [crm]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: Cross-entity search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchResult" }
+  /crm/reports:
+    get:
+      operationId: getStockReport
+      tags: [crm]
+      parameters:
+        - name: report
+          in: query
+          required: true
+          schema: { type: string }
+        - name: format
+          in: query
+          required: false
+          schema: { type: string, enum: [json, csv, xlsx, pdf] }
+        - name: from
+          in: query
+          required: false
+          schema: { type: string }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Report data or exported file
+          content:
+            application/json:
+              schema: {}
+            text/csv:
+              schema: { type: string, format: binary }
+            application/pdf:
+              schema: { type: string, format: binary }
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+  /crm/settings:
+    get:
+      operationId: getSellerSettings
+      tags: [crm]
+      responses:
+        "200":
+          description: Seller settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SellerSettings" }
+    put:
+      operationId: updateSellerSettings
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SellerSettingsUpdate" }
+      responses:
+        "200":
+          description: Seller settings updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SellerSettings" }
+  /crm/settings/test-email:
+    post:
+      operationId: sendTestEmail
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TestEmailRequest" }
+      responses:
+        "200":
+          description: Test email result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestEmailResult" }
+  /crm/email-senders:
+    get:
+      operationId: listEmailSenderAccounts
+      tags: [crm]
+      responses:
+        "200":
+          description: Sender account list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EmailSenderAccount" }
+    post:
+      operationId: createEmailSenderAccount
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailSenderAccountInput" }
+      responses:
+        "201":
+          description: Sender account created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailSenderAccount" }
+  /crm/email-senders/{id}:
+    patch:
+      operationId: updateEmailSenderAccount
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailSenderAccountUpdate" }
+      responses:
+        "200":
+          description: Sender account updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailSenderAccount" }
+    delete:
+      operationId: deleteEmailSenderAccount
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Sender account deleted
+  /crm/email-senders/{id}/test:
+    post:
+      operationId: sendEmailSenderTest
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TestEmailRequest" }
+      responses:
+        "200":
+          description: Test email result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TestEmailResult" }
+  /crm/email-marketing/filter-options:
+    get:
+      operationId: getEmailMarketingFilterOptions
+      tags: [crm]
+      responses:
+        "200":
+          description: Distinct filter values available for targeting
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailMarketingFilterOptions" }
+  /crm/email-marketing/recipients-preview:
+    get:
+      operationId: previewEmailMarketingRecipients
+      tags: [crm]
+      parameters:
+        - name: source
+          in: query
+          required: true
+          schema: { type: string, enum: [customers, leads] }
+        - name: cities
+          in: query
+          schema: { type: string }
+          description: Comma-separated city names (customers only).
+        - name: states
+          in: query
+          schema: { type: string }
+          description: Comma-separated state names (customers only).
+        - name: industries
+          in: query
+          schema: { type: string }
+          description: Comma-separated industries (leads only).
+      responses:
+        "200":
+          description: Recipient count and sample for the given filters
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailMarketingRecipientsPreview" }
+  /crm/email-marketing/campaigns:
+    get:
+      operationId: listEmailCampaigns
+      tags: [crm]
+      responses:
+        "200":
+          description: Bulk email campaign history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EmailCampaign" }
+    post:
+      operationId: createEmailCampaign
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailCampaignInput" }
+      responses:
+        "201":
+          description: Campaign created and sending started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailCampaign" }
+  /crm/email-marketing/campaigns/{id}:
+    get:
+      operationId: getEmailCampaign
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "200":
+          description: Campaign detail with per-recipient send log
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmailCampaignDetail" }
+  /web/categories:
+    get:
+      operationId: listPublicWebCategories
+      tags: [web]
+      responses:
+        "200":
+          description: Published categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PublicWebCategory" }
+  /web/categories/{slug}:
+    get:
+      operationId: getPublicWebCategory
+      tags: [web]
+      parameters: [{ $ref: "#/components/parameters/Slug" }]
+      responses:
+        "200":
+          description: Category with its published products
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicWebCategoryDetail" }
+        "404":
+          description: Not found
+  /web/products:
+    get:
+      operationId: listPublicWebProducts
+      tags: [web]
+      parameters:
+        - name: categorySlug
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Published products
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/WebProductSummary" }
+  /web/products/{slug}:
+    get:
+      operationId: getPublicWebProduct
+      tags: [web]
+      parameters: [{ $ref: "#/components/parameters/Slug" }]
+      responses:
+        "200":
+          description: Full product detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+        "404":
+          description: Not found
+  /crm/web-categories:
+    get:
+      operationId: listWebCategories
+      tags: [crm]
+      responses:
+        "200":
+          description: All categories (any status)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/WebCategory" }
+    post:
+      operationId: createWebCategory
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebCategoryInput" }
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebCategory" }
+  /crm/web-categories/{id}:
+    patch:
+      operationId: updateWebCategory
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebCategoryUpdate" }
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebCategory" }
+    delete:
+      operationId: deleteWebCategory
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Category deleted
+        "400":
+          description: Category still has products
+  /crm/web-products:
+    get:
+      operationId: listWebProducts
+      tags: [crm]
+      responses:
+        "200":
+          description: All products (any status)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/WebProductSummary" }
+    post:
+      operationId: createWebProduct
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebProductInput" }
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}:
+    get:
+      operationId: getWebProduct
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "200":
+          description: Full product detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+        "404":
+          description: Not found
+    patch:
+      operationId: updateWebProduct
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebProductUpdate" }
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+    delete:
+      operationId: deleteWebProduct
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Product deleted
+  /crm/web-products/{id}/key-range:
+    put:
+      operationId: replaceWebProductKeyRange
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceKeyRangeBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/spec-groups:
+    put:
+      operationId: replaceWebProductSpecGroups
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceSpecGroupsBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/features:
+    put:
+      operationId: replaceWebProductFeatures
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceFeaturesBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/applications:
+    put:
+      operationId: replaceWebProductApplications
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceApplicationsBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/images:
+    put:
+      operationId: replaceWebProductImages
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceImagesBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/faqs:
+    put:
+      operationId: replaceWebProductFaqs
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceFaqsBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/related:
+    put:
+      operationId: replaceWebProductRelated
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceRelatedBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/config-input-types:
+    put:
+      operationId: replaceWebProductConfigInputTypes
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceConfigInputTypesBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/mounting-variants:
+    put:
+      operationId: replaceWebProductMountingVariants
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceMountingVariantsBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-products/{id}/model-range:
+    put:
+      operationId: replaceWebProductModelRange
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReplaceModelRangeBody" }
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebProductDetail" }
+  /crm/web-content/export:
+    get:
+      operationId: exportWebContent
+      tags: [crm]
+      responses:
+        "200":
+          description: Full export of all website categories and products (with all nested detail) for copying into another environment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebContentExport" }
+  /crm/web-content/import:
+    post:
+      operationId: importWebContent
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebContentExport" }
+      responses:
+        "200":
+          description: Import summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WebContentImportResult" }
+  /crm/web-media:
+    get:
+      operationId: listWebMedia
+      tags: [crm]
+      responses:
+        "200":
+          description: All uploaded media library images
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MediaLibraryItem" }
+    post:
+      operationId: createWebMedia
+      tags: [crm]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaLibraryItemInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MediaLibraryItem" }
+  /crm/web-media/{id}:
+    delete:
+      operationId: deleteWebMedia
+      tags: [crm]
+      parameters: [{ $ref: "#/components/parameters/Id" }]
+      responses:
+        "204":
+          description: Deleted
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    ActiveOnly:
+      name: activeOnly
+      in: query
+      required: false
+      description: When true, only return rows whose status/active flag is Active/true (used by selection dropdowns; admin screens omit this to manage all rows).
+      schema: { type: boolean }
+  schemas:
+    HealthStatus:
+      type: object
+      properties: { status: { type: string } }
+      required: [status]
+    Customer:
+      type: object
+      required: [id, companyName, country, leadSource, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        companyName: { type: string }
+        contactPerson: { type: ["string", "null"] }
+        designation: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        altPhone: { type: ["string", "null"] }
+        gstin: { type: ["string", "null"] }
+        pan: { type: ["string", "null"] }
+        cin: { type: ["string", "null"] }
+        stateCode: { type: ["string", "null"] }
+        addressLine1: { type: ["string", "null"] }
+        addressLine2: { type: ["string", "null"] }
+        addressLine3: { type: ["string", "null"] }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: string }
+        pincode: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        leadSource: { type: string }
+        reference: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CustomerInput:
+      type: object
+      required: [companyName]
+      properties:
+        companyName: { type: string, minLength: 1 }
+        contactPerson: { type: string }
+        designation: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        altPhone: { type: string }
+        gstin: { type: string }
+        pan: { type: string }
+        cin: { type: string }
+        stateCode: { type: string }
+        addressLine1: { type: string }
+        addressLine2: { type: string }
+        addressLine3: { type: string }
+        city: { type: string }
+        state: { type: string }
+        country: { type: string }
+        pincode: { type: string }
+        notes: { type: string }
+        leadSource: { type: string }
+        reference: { type: string }
+    CustomerUpdate:
+      type: object
+      properties:
+        companyName: { type: string, minLength: 1 }
+        contactPerson: { type: ["string", "null"] }
+        designation: { type: ["string", "null"] }
+        email: { type: ["string", "null"], format: email }
+        phone: { type: ["string", "null"] }
+        altPhone: { type: ["string", "null"] }
+        gstin: { type: ["string", "null"] }
+        pan: { type: ["string", "null"] }
+        cin: { type: ["string", "null"] }
+        stateCode: { type: ["string", "null"] }
+        addressLine1: { type: ["string", "null"] }
+        addressLine2: { type: ["string", "null"] }
+        addressLine3: { type: ["string", "null"] }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: string }
+        pincode: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        leadSource: { type: string }
+        reference: { type: ["string", "null"] }
+    Inquiry:
+      type: object
+      required: [id, contactPerson, email, leadSource, productInterest, message, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        companyName: { type: ["string", "null"] }
+        contactPerson: { type: string }
+        email: { type: string, format: email }
+        phone: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        industry: { type: ["string", "null"] }
+        leadSource: { type: string }
+        purpose: { type: ["string", "null"] }
+        productInterest: { type: array, items: { type: string } }
+        quantity: { type: ["string", "null"] }
+        message: { type: string }
+        status: { type: string }
+        customerId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    InquiryInput:
+      type: object
+      required: [contactPerson, email, leadSource, message]
+      properties:
+        companyName: { type: string }
+        contactPerson: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+        phone: { type: string }
+        address: { type: string }
+        industry: { type: string }
+        leadSource: { type: string, minLength: 1 }
+        purpose: { type: string }
+        productInterest: { type: array, items: { type: string } }
+        quantity: { type: string }
+        message: { type: string, minLength: 1 }
+    InquiryUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        customerId: { type: ["integer", "null"] }
+    SalesExecutive:
+      type: object
+      required: [id, name, active, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        employeeCode: { type: ["string", "null"] }
+        designation: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        altPhone: { type: ["string", "null"] }
+        region: { type: ["string", "null"] }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        joiningDate: { type: ["string", "null"] }
+        active: { type: boolean }
+        notes: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SalesExecutiveInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        employeeCode: { type: string }
+        designation: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        altPhone: { type: string }
+        region: { type: string }
+        city: { type: string }
+        state: { type: string }
+        joiningDate: { type: string }
+        active: { type: boolean }
+        notes: { type: string }
+    SalesExecutiveUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        employeeCode: { type: ["string", "null"] }
+        designation: { type: ["string", "null"] }
+        email: { type: ["string", "null"], format: email }
+        phone: { type: ["string", "null"] }
+        altPhone: { type: ["string", "null"] }
+        region: { type: ["string", "null"] }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        joiningDate: { type: ["string", "null"] }
+        active: { type: boolean }
+        notes: { type: ["string", "null"] }
+    SellerSettings:
+      type: object
+      required: [id, country, numberingPrefix, numberingNextSequence, numberingPadding, defaultValidityDays, defaultGstPercent, defaultCurrency, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        companyName: { type: ["string", "null"] }
+        logoUrl: { type: ["string", "null"] }
+        gstin: { type: ["string", "null"] }
+        pan: { type: ["string", "null"] }
+        cin: { type: ["string", "null"] }
+        stateCode: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        website: { type: ["string", "null"] }
+        authorisedSignatoryName: { type: ["string", "null"] }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: string }
+        pincode: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        signatoryName: { type: ["string", "null"] }
+        signedDate: { type: ["string", "null"] }
+        expiryDate: { type: ["string", "null"] }
+        bankName: { type: ["string", "null"] }
+        accountNumber: { type: ["string", "null"] }
+        ifsc: { type: ["string", "null"] }
+        branch: { type: ["string", "null"] }
+        upiId: { type: ["string", "null"] }
+        numberingPrefix: { type: string }
+        numberingNextSequence: { type: integer }
+        numberingPadding: { type: integer }
+        defaultValidityDays: { type: integer }
+        defaultGstPercent: { type: number }
+        defaultCurrency: { type: string }
+        defaultTerms: { type: ["string", "null"] }
+        defaultNotes: { type: ["string", "null"] }
+        smtpHost: { type: ["string", "null"] }
+        smtpPort: { type: ["integer", "null"] }
+        smtpSecure: { type: boolean }
+        smtpUser: { type: ["string", "null"] }
+        smtpFromEmail: { type: ["string", "null"] }
+        smtpFromName: { type: ["string", "null"] }
+        smtpConfigured: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SellerSettingsUpdate:
+      type: object
+      properties:
+        companyName: { type: string }
+        logoUrl: { type: string }
+        gstin: { type: string }
+        pan: { type: string }
+        cin: { type: string }
+        stateCode: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        website: { type: string }
+        authorisedSignatoryName: { type: string }
+        city: { type: string }
+        state: { type: string }
+        country: { type: string }
+        pincode: { type: string }
+        address: { type: string }
+        signatoryName: { type: string }
+        signedDate: { type: string }
+        expiryDate: { type: string }
+        bankName: { type: string }
+        accountNumber: { type: string }
+        ifsc: { type: string }
+        branch: { type: string }
+        upiId: { type: string }
+        numberingPrefix: { type: string, minLength: 1 }
+        numberingNextSequence: { type: integer, minimum: 1 }
+        numberingPadding: { type: integer, minimum: 1, maximum: 10 }
+        defaultValidityDays: { type: integer, minimum: 0 }
+        defaultGstPercent: { type: number, minimum: 0 }
+        defaultCurrency: { type: string, minLength: 1 }
+        defaultTerms: { type: string }
+        defaultNotes: { type: string }
+        smtpHost: { type: string }
+        smtpPort: { type: integer }
+        smtpSecure: { type: boolean }
+        smtpUser: { type: string }
+        smtpPassword: { type: string }
+        smtpFromEmail: { type: string }
+        smtpFromName: { type: string }
+    TestEmailRequest:
+      type: object
+      required: [to]
+      properties:
+        to: { type: string, format: email }
+    TestEmailResult:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        message: { type: ["string", "null"] }
+    EmailSenderAccount:
+      type: object
+      required: [id, label, smtpHost, smtpPort, smtpSecure, smtpUser, fromEmail, active, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        smtpHost: { type: string }
+        smtpPort: { type: integer }
+        smtpSecure: { type: boolean }
+        smtpUser: { type: string }
+        fromEmail: { type: string }
+        fromName: { type: ["string", "null"] }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    EmailSenderAccountInput:
+      type: object
+      required: [label, smtpHost, smtpUser, smtpPassword, fromEmail]
+      properties:
+        label: { type: string, minLength: 1 }
+        smtpHost: { type: string, minLength: 1 }
+        smtpPort: { type: integer }
+        smtpSecure: { type: boolean }
+        smtpUser: { type: string, minLength: 1 }
+        smtpPassword: { type: string, minLength: 1 }
+        fromEmail: { type: string, format: email }
+        fromName: { type: string }
+        active: { type: boolean }
+    EmailSenderAccountUpdate:
+      type: object
+      properties:
+        label: { type: string, minLength: 1 }
+        smtpHost: { type: string, minLength: 1 }
+        smtpPort: { type: integer }
+        smtpSecure: { type: boolean }
+        smtpUser: { type: string, minLength: 1 }
+        smtpPassword: { type: string }
+        fromEmail: { type: string, format: email }
+        fromName: { type: ["string", "null"] }
+        active: { type: boolean }
+    EmailMarketingFilterOptions:
+      type: object
+      required: [cities, states, industries]
+      properties:
+        cities: { type: array, items: { type: string } }
+        states: { type: array, items: { type: string } }
+        industries: { type: array, items: { type: string } }
+    EmailMarketingRecipientSample:
+      type: object
+      required: [email, name]
+      properties:
+        email: { type: string }
+        name: { type: ["string", "null"] }
+    EmailMarketingRecipientsPreview:
+      type: object
+      required: [count, sample]
+      properties:
+        count: { type: integer }
+        sample:
+          type: array
+          items: { $ref: "#/components/schemas/EmailMarketingRecipientSample" }
+    EmailCampaignFilters:
+      type: object
+      properties:
+        cities: { type: array, items: { type: string } }
+        states: { type: array, items: { type: string } }
+        industries: { type: array, items: { type: string } }
+    EmailCampaign:
+      type: object
+      required: [id, subject, body, recipientSource, filters, totalRecipients, sentCount, failedCount, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        subject: { type: string }
+        body: { type: string }
+        recipientSource: { type: string, enum: [customers, leads] }
+        filters: { $ref: "#/components/schemas/EmailCampaignFilters" }
+        totalRecipients: { type: integer }
+        sentCount: { type: integer }
+        failedCount: { type: integer }
+        status: { type: string, enum: [sending, completed, failed] }
+        createdBy: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    EmailCampaignInput:
+      type: object
+      required: [subject, body, recipientSource]
+      properties:
+        subject: { type: string, minLength: 1 }
+        body: { type: string, minLength: 1 }
+        recipientSource: { type: string, enum: [customers, leads] }
+        cities: { type: string, description: "Comma-separated city names (customers only)." }
+        states: { type: string, description: "Comma-separated state names (customers only)." }
+        industries: { type: string, description: "Comma-separated industries (leads only)." }
+    EmailCampaignRecipient:
+      type: object
+      required: [id, campaignId, recipientEmail, status, createdAt]
+      properties:
+        id: { type: integer }
+        campaignId: { type: integer }
+        recipientEmail: { type: string }
+        recipientName: { type: ["string", "null"] }
+        senderAccountId: { type: ["integer", "null"] }
+        status: { type: string, enum: [pending, sent, failed] }
+        error: { type: ["string", "null"] }
+        sentAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+    EmailCampaignDetail:
+      allOf:
+        - { $ref: "#/components/schemas/EmailCampaign" }
+        - type: object
+          required: [recipients]
+          properties:
+            recipients:
+              type: array
+              items: { $ref: "#/components/schemas/EmailCampaignRecipient" }
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Original file name.
+        size:
+          type: integer
+          minimum: 1
+          description: File size in bytes.
+        contentType:
+          type: string
+          minLength: 1
+          description: MIME type of the file (e.g. `image/jpeg`).
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+          description: Presigned GCS URL for PUT upload.
+        objectPath:
+          type: string
+          description: Normalized object path (e.g. `/objects/uploads/uuid`). Store this in your database.
+        metadata:
+          $ref: '#/components/schemas/UploadUrlRequest'
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    DashboardSummary:
+      type: object
+      required: [totalQuotations, quotationsThisMonth, totalValue, wonValue, conversionRate, statusCounts, recentQuotations, customerCount, leadCount]
+      properties:
+        totalQuotations: { type: integer }
+        quotationsThisMonth: { type: integer }
+        totalValue: { type: number }
+        wonValue: { type: number }
+        conversionRate: { type: number }
+        statusCounts:
+          type: object
+          required: [Draft, Sent, Viewed, Accepted, Rejected, Expired, Converted]
+          properties:
+            Draft: { type: integer }
+            Sent: { type: integer }
+            Viewed: { type: integer }
+            Accepted: { type: integer }
+            Rejected: { type: integer }
+            Expired: { type: integer }
+            Converted: { type: integer }
+        recentQuotations:
+          type: array
+          items: { $ref: "#/components/schemas/Quotation" }
+        customerCount: { type: integer }
+        leadCount: { type: integer }
+    QuotationItem:
+      type: object
+      required: [itemName, qty, rate, discPercent, gstPercent]
+      properties:
+        itemName: { type: string, minLength: 1 }
+        description: { type: string }
+        hsnSac: { type: string }
+        productId: { type: ["integer", "null"] }
+        qty: { type: number, minimum: 0 }
+        rate: { type: number, minimum: 0 }
+        discPercent: { type: number, minimum: 0, maximum: 100 }
+        gstPercent: { type: number, minimum: 0 }
+    Quotation:
+      type: object
+      required: [id, quotationNumber, subject, taxType, billToCompany, items, subtotal, discountTotal, taxableValue, cgstAmount, sgstAmount, igstAmount, amount, currency, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        quotationNumber: { type: string }
+        customerId: { type: ["integer", "null"] }
+        inquiryId: { type: ["integer", "null"] }
+        salesExecutiveId: { type: ["integer", "null"] }
+        subject: { type: string }
+        quotationDate: { type: ["string", "null"] }
+        validUntil: { type: ["string", "null"] }
+        deliveryTime: { type: ["string", "null"] }
+        referenceNumber: { type: ["string", "null"] }
+        taxType: { type: string }
+        billToCompany: { type: string }
+        billToContact: { type: ["string", "null"] }
+        billToEmail: { type: ["string", "null"] }
+        billToPhone: { type: ["string", "null"] }
+        billToGstin: { type: ["string", "null"] }
+        billToStateCode: { type: ["string", "null"] }
+        billToCity: { type: ["string", "null"] }
+        billToState: { type: ["string", "null"] }
+        billToAddress: { type: ["string", "null"] }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/QuotationItem" }
+        subtotal: { type: number }
+        discountTotal: { type: number }
+        taxableValue: { type: number }
+        cgstAmount: { type: number }
+        sgstAmount: { type: number }
+        igstAmount: { type: number }
+        amount: { type: number }
+        currency: { type: string }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+        termsAndConditions: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    QuotationInput:
+      type: object
+      required: [subject, billToCompany, items]
+      properties:
+        customerId: { type: integer, minimum: 1 }
+        inquiryId: { type: integer, minimum: 1 }
+        salesExecutiveId: { type: integer, minimum: 1 }
+        subject: { type: string, minLength: 1 }
+        quotationDate: { type: string }
+        validUntil: { type: string }
+        deliveryTime: { type: string }
+        referenceNumber: { type: string }
+        taxType: { type: string }
+        billToCompany: { type: string, minLength: 1 }
+        billToContact: { type: string }
+        billToEmail: { type: string }
+        billToPhone: { type: string }
+        billToGstin: { type: string }
+        billToStateCode: { type: string }
+        billToCity: { type: string }
+        billToState: { type: string }
+        billToAddress: { type: string }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/QuotationItem" }
+        currency: { type: string }
+        status: { type: string }
+        notes: { type: string }
+        termsAndConditions: { type: string }
+    QuotationUpdate:
+      type: object
+      properties:
+        customerId: { type: ["integer", "null"] }
+        salesExecutiveId: { type: ["integer", "null"] }
+        subject: { type: string, minLength: 1 }
+        quotationDate: { type: ["string", "null"] }
+        validUntil: { type: ["string", "null"] }
+        deliveryTime: { type: ["string", "null"] }
+        referenceNumber: { type: ["string", "null"] }
+        taxType: { type: string }
+        billToCompany: { type: string, minLength: 1 }
+        billToContact: { type: ["string", "null"] }
+        billToEmail: { type: ["string", "null"] }
+        billToPhone: { type: ["string", "null"] }
+        billToGstin: { type: ["string", "null"] }
+        billToStateCode: { type: ["string", "null"] }
+        billToCity: { type: ["string", "null"] }
+        billToState: { type: ["string", "null"] }
+        billToAddress: { type: ["string", "null"] }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/QuotationItem" }
+        currency: { type: string }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+        termsAndConditions: { type: ["string", "null"] }
+    Product:
+      type: object
+      required: [id, productName, unit, unitPrice, gstPercent, minStock, maxStock, openingStock, trackBatch, trackExpiry, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        productName: { type: string }
+        description: { type: ["string", "null"] }
+        hsnSac: { type: ["string", "null"] }
+        unit: { type: string }
+        unitPrice: { type: number }
+        gstPercent: { type: number }
+        imageUrl: { type: ["string", "null"] }
+        productCode: { type: ["string", "null"] }
+        barcode: { type: ["string", "null"] }
+        qrCode: { type: ["string", "null"] }
+        categoryId: { type: ["integer", "null"] }
+        subGroupId: { type: ["integer", "null"] }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        minStock: { type: integer }
+        maxStock: { type: integer }
+        openingStock: { type: integer }
+        trackBatch: { type: boolean }
+        trackExpiry: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ProductInput:
+      type: object
+      required: [productName, unitPrice, gstPercent]
+      properties:
+        productName: { type: string, minLength: 1 }
+        description: { type: string }
+        hsnSac: { type: string }
+        unit: { type: string }
+        unitPrice: { type: number, minimum: 0 }
+        gstPercent: { type: number, minimum: 0 }
+        imageUrl: { type: ["string", "null"] }
+        categoryId: { type: ["integer", "null"] }
+        subGroupId: { type: ["integer", "null"] }
+        brand: { type: string }
+        model: { type: string }
+        minStock: { type: integer, minimum: 0 }
+        maxStock: { type: integer, minimum: 0 }
+        openingStock: { type: integer, minimum: 0 }
+        trackBatch: { type: boolean }
+        trackExpiry: { type: boolean }
+    ProductUpdate:
+      type: object
+      properties:
+        productName: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        hsnSac: { type: ["string", "null"] }
+        unit: { type: string }
+        unitPrice: { type: number, minimum: 0 }
+        gstPercent: { type: number, minimum: 0 }
+        imageUrl: { type: ["string", "null"] }
+        categoryId: { type: ["integer", "null"] }
+        subGroupId: { type: ["integer", "null"] }
+        brand: { type: ["string", "null"] }
+        model: { type: ["string", "null"] }
+        minStock: { type: integer, minimum: 0 }
+        maxStock: { type: integer, minimum: 0 }
+        openingStock: { type: integer, minimum: 0 }
+        trackBatch: { type: boolean }
+        trackExpiry: { type: boolean }
+    BulkMinStockInput:
+      type: object
+      required: [minStock]
+      properties:
+        minStock: { type: integer, minimum: 0 }
+    BulkMinStockResult:
+      type: object
+      required: [updated]
+      properties:
+        updated: { type: integer }
+    Category:
+      type: object
+      required: [id, name, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        status: { type: string }
+    CategoryUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        status: { type: string }
+    SubGroup:
+      type: object
+      required: [id, categoryId, name, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        categoryId: { type: integer }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SubGroupInput:
+      type: object
+      required: [categoryId, name]
+      properties:
+        categoryId: { type: integer, minimum: 1 }
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        status: { type: string }
+    SubGroupUpdate:
+      type: object
+      properties:
+        categoryId: { type: integer, minimum: 1 }
+        name: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        status: { type: string }
+    Supplier:
+      type: object
+      required: [id, name, outstandingBalance, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        companyName: { type: ["string", "null"] }
+        gstin: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        outstandingBalance: { type: number }
+        notes: { type: ["string", "null"] }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SupplierInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        companyName: { type: string }
+        gstin: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        address: { type: string }
+        outstandingBalance: { type: number }
+        notes: { type: string }
+        status: { type: string }
+    SupplierUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        companyName: { type: ["string", "null"] }
+        gstin: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        outstandingBalance: { type: number }
+        notes: { type: ["string", "null"] }
+        status: { type: string }
+    Warehouse:
+      type: object
+      required: [id, name, isDefault, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        location: { type: ["string", "null"] }
+        isDefault: { type: boolean }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    WarehouseInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        location: { type: string }
+        isDefault: { type: boolean }
+        status: { type: string }
+    WarehouseUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        location: { type: ["string", "null"] }
+        isDefault: { type: boolean }
+        status: { type: string }
+    StaffRole:
+      type: object
+      required: [id, email, role, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        email: { type: string }
+        name: { type: ["string", "null"] }
+        role: { type: string }
+        salesExecutiveId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    StaffRoleInput:
+      type: object
+      required: [email, role]
+      properties:
+        email: { type: string, minLength: 1 }
+        name: { type: string }
+        role: { type: string }
+        salesExecutiveId: { type: ["integer", "null"] }
+        password: { type: string, minLength: 8, description: "Sets the staff member's login password directly. Optional — omit to leave sign-in to self-registration." }
+    StaffRoleUpdate:
+      type: object
+      properties:
+        name: { type: ["string", "null"] }
+        role: { type: string }
+        salesExecutiveId: { type: ["integer", "null"] }
+        password: { type: string, minLength: 8, description: "Resets the staff member's login password. Optional — omit to leave the password unchanged." }
+    CurrentUser:
+      type: object
+      required: [email, role, permissions]
+      properties:
+        email: { type: string }
+        role: { type: string }
+        permissions:
+          type: object
+          description: >-
+            Centralized permission grant for this role (module -> allowed actions), derived
+            server-side from the same matrix every API route enforces. The frontend renders
+            off this to hide/disable unauthorized UI -- it must never be treated as the
+            access-control decision itself; every route re-validates independently.
+          additionalProperties:
+            type: array
+            items: { type: string }
+    PurchaseSaleItem:
+      type: object
+      required: [productId, productName, quantity, price, discPercent, gstPercent]
+      properties:
+        productId: { type: integer }
+        productName: { type: string }
+        quantity: { type: number, minimum: 0 }
+        price: { type: number, minimum: 0 }
+        discPercent: { type: number, minimum: 0, maximum: 100 }
+        gstPercent: { type: number, minimum: 0 }
+        batchNumber: { type: string }
+        serialNumber: { type: string }
+        expiryDate: { type: string }
+        manufacturingDate: { type: string }
+    Purchase:
+      type: object
+      required: [id, purchaseNumber, purchaseDate, supplierId, warehouseId, paymentMode, items, subtotal, discountTotal, gstTotal, totalAmount, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        purchaseNumber: { type: string }
+        purchaseDate: { type: string }
+        supplierId: { type: integer }
+        warehouseId: { type: integer }
+        invoiceNumber: { type: ["string", "null"] }
+        paymentMode: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        subtotal: { type: number }
+        discountTotal: { type: number }
+        gstTotal: { type: number }
+        totalAmount: { type: number }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    PurchaseInput:
+      type: object
+      required: [purchaseDate, supplierId, warehouseId, items]
+      properties:
+        purchaseDate: { type: string, minLength: 1 }
+        supplierId: { type: integer, minimum: 1 }
+        warehouseId: { type: integer, minimum: 1 }
+        invoiceNumber: { type: string }
+        paymentMode: { type: string }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        status: { type: string }
+        notes: { type: string }
+    PurchaseUpdate:
+      type: object
+      properties:
+        purchaseDate: { type: string, minLength: 1 }
+        supplierId: { type: integer, minimum: 1 }
+        warehouseId: { type: integer, minimum: 1 }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+        invoiceNumber: { type: ["string", "null"] }
+        paymentMode: { type: string }
+    Sale:
+      type: object
+      required: [id, invoiceNumber, saleDate, warehouseId, items, subtotal, discountTotal, gstTotal, totalAmount, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        invoiceNumber: { type: string }
+        saleDate: { type: string }
+        customerId: { type: ["integer", "null"] }
+        warehouseId: { type: integer }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        subtotal: { type: number }
+        discountTotal: { type: number }
+        gstTotal: { type: number }
+        totalAmount: { type: number }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SaleInput:
+      type: object
+      required: [saleDate, warehouseId, items]
+      properties:
+        saleDate: { type: string, minLength: 1 }
+        customerId: { type: integer, minimum: 1 }
+        warehouseId: { type: integer, minimum: 1 }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        status: { type: string }
+        notes: { type: string }
+    SaleUpdate:
+      type: object
+      properties:
+        saleDate: { type: string, minLength: 1 }
+        customerId: { type: ["integer", "null"], minimum: 1 }
+        warehouseId: { type: integer, minimum: 1 }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/PurchaseSaleItem" }
+        status: { type: string }
+        notes: { type: ["string", "null"] }
+    StockLevel:
+      type: object
+      required: [productId, productName, productCode, warehouseId, warehouseName, quantity, minStock, maxStock, statusLabel]
+      properties:
+        productId: { type: integer }
+        productName: { type: string }
+        productCode: { type: ["string", "null"] }
+        unit: { type: string }
+        categoryId: { type: ["integer", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        warehouseId: { type: integer }
+        warehouseName: { type: string }
+        quantity: { type: integer }
+        minStock: { type: integer }
+        maxStock: { type: integer }
+        statusLabel: { type: string }
+    StockHistoryEntry:
+      type: object
+      required: [id, productId, warehouseId, type, quantity, createdAt]
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        warehouseId: { type: integer }
+        type: { type: string }
+        quantity: { type: integer }
+        refType: { type: ["string", "null"] }
+        refId: { type: ["integer", "null"] }
+        refNumber: { type: ["string", "null"] }
+        batchNumber: { type: ["string", "null"] }
+        serialNumber: { type: ["string", "null"] }
+        expiryDate: { type: ["string", "null"] }
+        manufacturingDate: { type: ["string", "null"] }
+        notes: { type: ["string", "null"] }
+        createdBy: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    StockAdjustmentInput:
+      type: object
+      required: [productId, type, quantity]
+      properties:
+        productId: { type: integer, minimum: 1 }
+        type: { type: string, enum: [increase, decrease, transfer] }
+        quantity: { type: integer, minimum: 1 }
+        warehouseId: { type: integer, minimum: 1 }
+        fromWarehouseId: { type: integer, minimum: 1 }
+        toWarehouseId: { type: integer, minimum: 1 }
+        reason: { type: string }
+        notes: { type: string }
+    StockDashboard:
+      type: object
+      required: [totalProducts, totalCategories, totalPurchases, totalSales, currentStockQty, lowStockCount, outOfStockCount, stockValue, todayPurchaseValue, todaySalesValue, recentPurchases, recentSales, lowStockProducts]
+      properties:
+        totalProducts: { type: integer }
+        totalCategories: { type: integer }
+        totalPurchases: { type: integer }
+        totalSales: { type: integer }
+        currentStockQty: { type: integer }
+        lowStockCount: { type: integer }
+        outOfStockCount: { type: integer }
+        stockValue: { type: number }
+        todayPurchaseValue: { type: number }
+        todaySalesValue: { type: number }
+        recentPurchases:
+          type: array
+          items: { $ref: "#/components/schemas/Purchase" }
+        recentSales:
+          type: array
+          items: { $ref: "#/components/schemas/Sale" }
+        lowStockProducts:
+          type: array
+          items: { $ref: "#/components/schemas/StockLevel" }
+    StockNotification:
+      type: object
+      required: [id, type, severity, message, createdAt]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        severity: { type: string }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+    SearchResult:
+      type: object
+      required: [kind, id, label, sublabel]
+      properties:
+        kind: { type: string }
+        id: { type: integer }
+        label: { type: string }
+        sublabel: { type: string }
+    WebCategory:
+      type: object
+      required: [id, name, slug, status, displayOrder, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        shortDescription: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        bannerUrl: { type: ["string", "null"] }
+        displayOrder: { type: integer }
+        status: { type: string }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        seoKeywords: { type: ["string", "null"] }
+        ogImageUrl: { type: ["string", "null"] }
+        productCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    WebCategoryInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        shortDescription: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        bannerUrl: { type: string }
+        displayOrder: { type: integer }
+        status: { type: string }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords: { type: string }
+        ogImageUrl: { type: string }
+    WebCategoryUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        shortDescription: { type: string }
+        description: { type: string }
+        imageUrl: { type: string }
+        bannerUrl: { type: string }
+        displayOrder: { type: integer }
+        status: { type: string }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords: { type: string }
+        ogImageUrl: { type: string }
+    WebProductSummary:
+      type: object
+      required: [id, name, slug, status, featured, displayOrder, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        name: { type: string }
+        slug: { type: string }
+        series: { type: ["string", "null"] }
+        tagline: { type: ["string", "null"] }
+        mainImageUrl: { type: ["string", "null"] }
+        status: { type: string }
+        featured: { type: boolean }
+        displayOrder: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    WebProductKeyRangeItem:
+      type: object
+      required: [id, label, displayOrder]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        displayOrder: { type: integer }
+    WebProductSpecItem:
+      type: object
+      required: [id, label, value, displayOrder]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        value: { type: string }
+        displayOrder: { type: integer }
+    WebProductSpecGroup:
+      type: object
+      required: [id, groupName, displayOrder, specs]
+      properties:
+        id: { type: integer }
+        groupName: { type: string }
+        displayOrder: { type: integer }
+        specs:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductSpecItem" }
+    WebProductFeatureItem:
+      type: object
+      required: [id, text, displayOrder]
+      properties:
+        id: { type: integer }
+        text: { type: string }
+        displayOrder: { type: integer }
+    WebProductApplicationItem:
+      type: object
+      required: [id, label, displayOrder]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        displayOrder: { type: integer }
+    WebProductImageItem:
+      type: object
+      required: [id, imageUrl, displayOrder]
+      properties:
+        id: { type: integer }
+        imageUrl: { type: string }
+        altText: { type: ["string", "null"] }
+        displayOrder: { type: integer }
+    MediaLibraryItem:
+      type: object
+      required: [id, imageUrl, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        imageUrl: { type: string }
+        fileName: { type: ["string", "null"] }
+        altText: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MediaLibraryItemInput:
+      type: object
+      required: [imageUrl]
+      properties:
+        imageUrl: { type: string, minLength: 1 }
+        fileName: { type: string }
+        altText: { type: string }
+    WebProductFaqItem:
+      type: object
+      required: [id, question, answer, displayOrder]
+      properties:
+        id: { type: integer }
+        question: { type: string }
+        answer: { type: string }
+        displayOrder: { type: integer }
+    WebProductConfigInputTypeItem:
+      type: object
+      required: [id, label, displayOrder]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        displayOrder: { type: integer }
+    WebProductMountingVariantItem:
+      type: object
+      required: [id, name, displayOrder, features]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        displayOrder: { type: integer }
+        features:
+          type: array
+          items: { type: string }
+    WebProductModelRangeRowItem:
+      type: object
+      required: [id, cells, displayOrder]
+      properties:
+        id: { type: integer }
+        cells:
+          type: array
+          items: { type: string }
+        displayOrder: { type: integer }
+    WebProductDetail:
+      type: object
+      required: [id, name, slug, status, featured, displayOrder, createdAt, updatedAt, keyRange, specGroups, features, applications, images, faqs, related, configInputTypes, mountingVariants, modelRangeHeaders, modelRangeRows]
+      properties:
+        id: { type: integer }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        categorySlug: { type: ["string", "null"] }
+        name: { type: string }
+        slug: { type: string }
+        series: { type: ["string", "null"] }
+        tagline: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        mainImageUrl: { type: ["string", "null"] }
+        descriptionImageUrl: { type: ["string", "null"] }
+        descriptionTitle: { type: ["string", "null"] }
+        docUrl: { type: ["string", "null"] }
+        videoUrl: { type: ["string", "null"] }
+        status: { type: string }
+        featured: { type: boolean }
+        displayOrder: { type: integer }
+        modelRangeHeaders:
+          type: array
+          items: { type: string }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        seoKeywords: { type: ["string", "null"] }
+        ogImageUrl: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        keyRange:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductKeyRangeItem" }
+        specGroups:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductSpecGroup" }
+        features:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductFeatureItem" }
+        applications:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductApplicationItem" }
+        images:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductImageItem" }
+        faqs:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductFaqItem" }
+        related:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductSummary" }
+        configInputTypes:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductConfigInputTypeItem" }
+        mountingVariants:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductMountingVariantItem" }
+        modelRangeRows:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductModelRangeRowItem" }
+    WebProductInput:
+      type: object
+      required: [name, slug]
+      properties:
+        categoryId: { type: ["integer", "null"] }
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        series: { type: string }
+        tagline: { type: string }
+        description: { type: string }
+        mainImageUrl: { type: string }
+        descriptionImageUrl: { type: string }
+        descriptionTitle: { type: string }
+        docUrl: { type: string }
+        videoUrl: { type: string }
+        status: { type: string }
+        featured: { type: boolean }
+        displayOrder: { type: integer }
+        modelRangeHeaders:
+          type: array
+          items: { type: string }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords: { type: string }
+        ogImageUrl: { type: string }
+    WebProductUpdate:
+      type: object
+      properties:
+        categoryId: { type: ["integer", "null"] }
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        series: { type: string }
+        tagline: { type: string }
+        description: { type: string }
+        mainImageUrl: { type: string }
+        descriptionImageUrl: { type: string }
+        descriptionTitle: { type: string }
+        docUrl: { type: string }
+        videoUrl: { type: string }
+        status: { type: string }
+        featured: { type: boolean }
+        displayOrder: { type: integer }
+        modelRangeHeaders:
+          type: array
+          items: { type: string }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords: { type: string }
+        ogImageUrl: { type: string }
+    WebContentExport:
+      type: object
+      required: [categories, products, exportedAt]
+      properties:
+        exportedAt: { type: string, format: date-time }
+        categories:
+          type: array
+          items: { $ref: "#/components/schemas/WebCategory" }
+        products:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductDetail" }
+    WebContentImportResult:
+      type: object
+      required: [categoriesCreated, categoriesUpdated, productsCreated, productsUpdated]
+      properties:
+        categoriesCreated: { type: integer }
+        categoriesUpdated: { type: integer }
+        productsCreated: { type: integer }
+        productsUpdated: { type: integer }
+    ReplaceKeyRangeBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [label]
+            properties:
+              label: { type: string, minLength: 1 }
+    ReplaceSpecGroupsBody:
+      type: object
+      required: [groups]
+      properties:
+        groups:
+          type: array
+          items:
+            type: object
+            required: [groupName, specs]
+            properties:
+              groupName: { type: string, minLength: 1 }
+              specs:
+                type: array
+                items:
+                  type: object
+                  required: [label, value]
+                  properties:
+                    label: { type: string, minLength: 1 }
+                    value: { type: string, minLength: 1 }
+    ReplaceFeaturesBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [text]
+            properties:
+              text: { type: string, minLength: 1 }
+    ReplaceApplicationsBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [label]
+            properties:
+              label: { type: string, minLength: 1 }
+              imageUrl: { type: string }
+    ReplaceImagesBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [imageUrl]
+            properties:
+              imageUrl: { type: string, minLength: 1 }
+              altText: { type: string }
+    ReplaceFaqsBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [question, answer]
+            properties:
+              question: { type: string, minLength: 1 }
+              answer: { type: string, minLength: 1 }
+    ReplaceRelatedBody:
+      type: object
+      required: [relatedProductIds]
+      properties:
+        relatedProductIds:
+          type: array
+          items: { type: integer }
+    ReplaceConfigInputTypesBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [label]
+            properties:
+              label: { type: string, minLength: 1 }
+              imageUrl: { type: string }
+    ReplaceMountingVariantsBody:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [name, features]
+            properties:
+              name: { type: string, minLength: 1 }
+              imageUrl: { type: string }
+              features:
+                type: array
+                items: { type: string }
+    ReplaceModelRangeBody:
+      type: object
+      required: [headers, rows]
+      properties:
+        headers:
+          type: array
+          items: { type: string }
+        rows:
+          type: array
+          items:
+            type: array
+            items: { type: string }
+    PublicWebCategory:
+      type: object
+      required: [id, name, slug, productCount]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        shortDescription: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        bannerUrl: { type: ["string", "null"] }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        seoKeywords: { type: ["string", "null"] }
+        ogImageUrl: { type: ["string", "null"] }
+        productCount: { type: integer }
+    PublicWebCategoryDetail:
+      type: object
+      required: [category, products]
+      properties:
+        category: { $ref: "#/components/schemas/PublicWebCategory" }
+        products:
+          type: array
+          items: { $ref: "#/components/schemas/WebProductSummary" }

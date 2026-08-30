@@ -1,3 +1,0 @@
-# Starshine Drive
-
-Initial commit.

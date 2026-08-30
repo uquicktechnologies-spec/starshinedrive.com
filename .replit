@@ -1,0 +1,31 @@
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+CRM_STAFF_EMAILS = "sales-admin-l1xm6n@example.com,surefix.store@gmail.com,uquicktechnologies@gmail.com,aditi@restorex360.com"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-b6c50b1e-93dc-423c-be6b-c8ecf468ef4b"

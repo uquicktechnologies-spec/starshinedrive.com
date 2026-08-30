@@ -1,0 +1,14 @@
+- [Starshine Drive brand tokens](starshine-brand.md) — primary #093C71 (navy), accent #EF6F24 (orange), font IBM Plex Sans; tokens live in starshine-drives/src/index.css (mobile app removed Aug 2026)
+- [CRM auth & DB migrations](crm-auth-and-migrations.md) — CRM_STAFF_EMAILS allow-list fails closed; Clerk session claims lack email here; embedded SignIn needs hash routing; migrations applied at API startup.
+- [Workspace lib packages w/ own deps](workspace-lib-packages.md) — new `lib/*` packages need `pnpm install` + `tsc --build` (composite:true) before consuming apps typecheck/HMR cleanly.
+- [Express Request augmentation issue](express-request-augmentation.md) — global Express Request augmentation doesn't resolve here; use a local `Request & {...}` intersection type + cast instead.
+- [Drizzle tx callback typing](drizzle-transaction-typing.md) — type extracted transaction helpers' `tx` param as `Parameters<Parameters<typeof db.transaction>[0]>[0]`, not `typeof db`.
+- [orval hook `enabled` typing](orval-query-options-enabled.md) — generated query hooks need an explicit `TData` generic + cast to pass just `{ enabled }`.
+- [pdfkit row-column layout pitfalls](pdfkit-row-layout.md) — reading `doc.y` between same-row `.text()` calls staircases columns; never reset `doc.y` backward to "fix" it.
+- [Website product/category CMS](web-content-cms.md) — new `webContent` schema/admin UI is separate from both stock-inventory products AND the legacy static marketing pages; public site doesn't read it yet.
+- [CRM image picker pattern](crm-image-picker.md) — all CRM image uploads go through one shared two-tab (Gallery/Upload) `ImagePickerButton` in `crm/shared.tsx`, backed by the `web_media_library` table; new upload call sites should reuse it, not add a bare `ObjectUploader`.
+- [Router-level view-guard pitfall](router-view-guard-pitfall.md) — a router-level `requirePermission(module,"view")` doesn't cover specific mutation actions; each route/button needs its own action check.
+- [CRM screen-state convention](crm-screen-state-convention.md) — every CRM list/detail screen must use shared.tsx's LoadingState/Row, EmptyState/Row, PermissionDenied, LoadError(onRetry) instead of ad hoc markup.
+- [CRM concurrency & caching decisions](crm-concurrency-and-caching.md) — doc-number generation must share a tx+lock with its insert; React Query defaults set staleTime 30s, no refetch-on-focus.
+- [CRM double-submit form risk](crm-double-submit-forms.md) — POST-create forms need submit disabled on mutation.isPending or double-click makes duplicate rows; replace-endpoint saves are lower risk.
+- [CRM generated-client type drift](crm-generated-client-type-drift.md) — many CRM pages fail tsc pre-existing (not a regression); generated response types don't match page code's expected shape; runtime unaffected.
