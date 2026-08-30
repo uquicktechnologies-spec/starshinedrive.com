@@ -1,12 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ClerkProvider, SignIn, Show, useClerk } from '@clerk/react';
-import { publishableKeyFromHost } from '@clerk/react/internal';
-import { shadcn } from '@clerk/themes';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { useGetCurrentUser, getGetCurrentUserQueryKey } from '@workspace/api-client-react';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, useLocation, useParams } from 'wouter';
+import { SiWhatsapp } from 'react-icons/si';
 
 const Home = lazy(() => import('@/pages/home'));
 const Products = lazy(() => import('@/pages/products'));
@@ -21,6 +20,7 @@ const FAQPage = lazy(() => import('@/pages/faq'));
 const QualityControl = lazy(() => import('@/pages/quality-control'));
 const ReplacementSupport = lazy(() => import('@/pages/replacement-support'));
 const SelectionGuide = lazy(() => import('@/pages/selection-guide'));
+const Configurator = lazy(() => import('@/pages/selection-guide'));
 const Privacy = lazy(() => import('@/pages/privacy'));
 const Terms = lazy(() => import('@/pages/terms'));
 const Crm = lazy(() => import('@/pages/crm'));
@@ -40,71 +40,232 @@ const queryClient = new QueryClient({
   },
 });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 
-function stripBase(path: string): string {
-  return basePath && path.startsWith(basePath) ? path.slice(basePath.length) || '/' : path;
+function AuthInput({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="mb-4">
+      <label className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+      <input
+        {...props}
+        className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#093C71]/30"
+      />
+    </div>
+  );
 }
 
-const clerkAppearance = {
-  theme: shadcn,
-  cssLayerName: 'clerk',
-  options: {
-    logoPlacement: 'inside' as const,
-    logoLinkUrl: basePath || '/',
-    logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
-  },
-  variables: {
-    colorPrimary: '#093C71',
-    colorForeground: '#172033',
-    colorMutedForeground: '#64748B',
-    colorDanger: '#dc2626',
-    colorBackground: '#ffffff',
-    colorInput: '#ffffff',
-    colorInputForeground: '#172033',
-    colorNeutral: '#cbd5e1',
-    fontFamily: 'IBM Plex Sans, sans-serif',
-    borderRadius: '4px',
-  },
-  elements: {
-    rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-white rounded-lg w-[440px] max-w-full overflow-hidden shadow-xl',
-    card: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    headerTitle: 'text-[#093C71]',
-    headerSubtitle: 'text-slate-500',
-    formFieldLabel: 'text-slate-700',
-    formButtonPrimary: 'bg-[#093C71] hover:bg-[#072d55] text-white',
-    footerActionLink: 'text-[#093C71]',
-    footerActionText: 'text-slate-500',
-    dividerText: 'text-slate-500',
-    formFieldInput: 'border-slate-300',
-  },
-};
+function SignInForm({ prefillEmail, notice }: { prefillEmail?: string; notice?: string | null }) {
+  const client = useQueryClient();
+  const [email, setEmail] = useState(prefillEmail ?? '');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${basePath}/api/auth/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, rememberMe }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Invalid email or password');
+        return;
+      }
+      await client.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
+    } catch {
+      setError('Unable to sign in. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {notice && (
+        <p className="mb-4 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>
+      )}
+      <AuthInput
+        label="Email"
+        type="email"
+        required
+        autoComplete="username"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <AuthInput
+        label="Password"
+        type="password"
+        required
+        autoComplete="current-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <label className="mb-4 flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+        <input
+          type="checkbox"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-[#093C71] focus:ring-[#093C71]/30"
+        />
+        Remember me on this device
+      </label>
+      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded bg-[#093C71] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#072d55] disabled:opacity-60"
+      >
+        {submitting ? 'Signing in...' : 'Sign in'}
+      </button>
+    </form>
+  );
+}
+
+function SignUpForm({ onSignedUp }: { onSignedUp: (email: string) => void }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${basePath}/api/auth/signup`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name: name || undefined }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || 'Could not create account');
+        return;
+      }
+      onSignedUp(email);
+    } catch {
+      setError('Unable to create account. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <AuthInput
+        label="Name (optional)"
+        type="text"
+        autoComplete="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <AuthInput
+        label="Email"
+        type="email"
+        required
+        autoComplete="username"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <AuthInput
+        label="Password"
+        type="password"
+        required
+        minLength={8}
+        autoComplete="new-password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <AuthInput
+        label="Confirm password"
+        type="password"
+        required
+        minLength={8}
+        autoComplete="new-password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+      />
+      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded bg-[#093C71] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#072d55] disabled:opacity-60"
+      >
+        {submitting ? 'Creating account...' : 'Create account'}
+      </button>
+    </form>
+  );
+}
 
 function AuthPage() {
-  return <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-    <SignIn routing="hash" fallbackRedirectUrl={`${basePath}/crm`} signUpFallbackRedirectUrl={`${basePath}/crm`} />
-  </div>;
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [signedUpEmail, setSignedUpEmail] = useState<string | null>(null);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+      <div className="w-[380px] max-w-full rounded-lg bg-white p-8 shadow-xl">
+        <h1 className="mb-1 text-xl font-bold text-[#093C71]">
+          {mode === 'sign-in' ? 'Staff sign in' : 'Create your account'}
+        </h1>
+        <p className="mb-6 text-sm text-slate-500">
+          {mode === 'sign-in'
+            ? 'Sign in with your Starshine Drive CRM credentials.'
+            : 'Set up your own Starshine Drive CRM login.'}
+        </p>
+
+        <div className="mb-6 flex rounded-md bg-slate-100 p-1 text-sm font-medium">
+          <button
+            type="button"
+            onClick={() => setMode('sign-in')}
+            className={`flex-1 rounded px-3 py-1.5 transition-colors ${mode === 'sign-in' ? 'bg-white text-[#093C71] shadow' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Sign in
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('sign-up')}
+            className={`flex-1 rounded px-3 py-1.5 transition-colors ${mode === 'sign-up' ? 'bg-white text-[#093C71] shadow' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Sign up
+          </button>
+        </div>
+
+        {mode === 'sign-in' ? (
+          <SignInForm
+            prefillEmail={signedUpEmail ?? undefined}
+            notice={signedUpEmail ? 'Account created. Sign in with your new password.' : null}
+          />
+        ) : (
+          <SignUpForm
+            onSignedUp={(email) => {
+              setSignedUpEmail(email);
+              setMode('sign-in');
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 function ProtectedCrm() {
-  return <><Show when="signed-in"><Crm /></Show><Show when="signed-out"><AuthPage /></Show></>;
-}
-
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const previousUserId = useRef<string | null | undefined>(undefined);
-  useEffect(() => addListener(({ user }) => {
-    const userId = user?.id ?? null;
-    if (previousUserId.current !== undefined && previousUserId.current !== userId) queryClient.clear();
-    previousUserId.current = userId;
-  }), [addListener]);
-  return null;
+  const { data, isLoading, isError } = useGetCurrentUser({ query: { queryKey: getGetCurrentUserQueryKey(), retry: false } });
+  if (isLoading) return <div className="min-h-screen bg-white" aria-busy="true" />;
+  if (isError || !data) return <AuthPage />;
+  return <Crm />;
 }
 
 function ProductDetailRoute() {
@@ -127,6 +288,22 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location]);
   return null;
+}
+
+function FloatingWhatsApp() {
+  return (
+    <a
+      href="https://wa.me/+919925001323"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat with Starshine Drive on WhatsApp"
+      title="Chat with Starshine Drive on WhatsApp"
+      className="floating-whatsapp group fixed z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_8px_24px_rgba(9,60,113,0.26)] transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#EF6F24]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+    >
+      <span className="pointer-events-none absolute inset-0 rounded-full bg-[#25D366] floating-whatsapp-pulse" aria-hidden="true" />
+      <SiWhatsapp className="relative h-7 w-7 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
+    </a>
+  );
 }
 
 function Router() {
@@ -154,7 +331,7 @@ function Router() {
           <Route path="/terms" component={Terms} />
           <Route path="/crm" component={ProtectedCrm} />
           <Route path="/sign-in/*?" component={AuthPage} />
-          <Route path="/configurator" component={Home} />
+          <Route path="/configurator" component={Configurator} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>
@@ -165,22 +342,13 @@ function Router() {
 function App() {
   return (
     <WouterRouter base={basePath}>
-      <ClerkProvider
-        publishableKey={clerkPubKey}
-        proxyUrl={clerkProxyUrl}
-        appearance={clerkAppearance}
-        signInUrl={`${basePath}/sign-in`}
-        routerPush={(to) => window.history.pushState(null, '', stripBase(to))}
-        routerReplace={(to) => window.history.replaceState(null, '', stripBase(to))}
-      >
-        <QueryClientProvider client={queryClient}>
-          <ClerkQueryClientCacheInvalidator />
-          <TooltipProvider>
-            <Router />
-            <Toaster />
-          </TooltipProvider>
-        </QueryClientProvider>
-      </ClerkProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Router />
+          <FloatingWhatsApp />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
     </WouterRouter>
   );
 }

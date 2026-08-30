@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useClerk, useUser } from "@clerk/react";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { getGetCurrentUserQueryKey } from "@workspace/api-client-react";
 import {
   LayoutDashboard, Users, UserPlus, FileText, Package, Briefcase, Settings, LogOut,
   Boxes, Database, ShoppingBag, ShoppingCart, ClipboardList, BarChart3, ShieldCheck, Search, Bell, Mail, Globe,
@@ -20,9 +20,13 @@ interface LayoutProps {
 }
 
 export function CrmLayout({ view, onNavigate, children }: LayoutProps) {
-  const { user } = useUser();
-  const { signOut } = useClerk();
-  const { can, role } = usePermissions();
+  const queryClient = useQueryClient();
+  const { can, role, email } = usePermissions();
+  const signOut = async () => {
+    await fetch(`${import.meta.env.BASE_URL}api/auth/logout`, { method: "POST", credentials: "include" });
+    queryClient.clear();
+    window.location.href = import.meta.env.BASE_URL;
+  };
   const roleLabel = role === "admin" ? "Admin" : role === "manager" ? "Manager" : "Staff Member";
 
   // Nav visibility is derived from the centralized permission matrix (one module -> one nav
@@ -120,11 +124,11 @@ export function CrmLayout({ view, onNavigate, children }: LayoutProps) {
         <div className="p-4 border-t border-white/10 bg-black/20">
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1 pr-2">
-              <div className="text-sm font-semibold text-white truncate">{user?.fullName || roleLabel}</div>
-              <div className="text-[11px] text-slate-400 truncate mt-0.5">{user?.primaryEmailAddress?.emailAddress}</div>
+              <div className="text-sm font-semibold text-white truncate">{roleLabel}</div>
+              <div className="text-[11px] text-slate-400 truncate mt-0.5">{email}</div>
             </div>
             <button 
-              onClick={() => signOut({ redirectUrl: "/" })}
+              onClick={() => void signOut()}
               className="p-2 rounded-sm hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
               title="Sign out"
             >

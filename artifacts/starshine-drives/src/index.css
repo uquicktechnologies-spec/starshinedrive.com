@@ -1,7 +1,6 @@
-@layer theme, base, clerk, components, utilities;
+@layer theme, base, components, utilities;
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '@clerk/themes/shadcn.css';
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -240,6 +239,35 @@ input[type="number"] {
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading tracking-tight;
+  }
+}
+
+@keyframes floating-whatsapp-pulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  12% {
+    opacity: 0.3;
+  }
+  55% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+.floating-whatsapp {
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+.floating-whatsapp-pulse {
+  animation: floating-whatsapp-pulse 3.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-whatsapp-pulse {
+    animation: none;
   }
 }
 

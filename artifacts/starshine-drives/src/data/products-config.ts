@@ -30,8 +30,16 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
         features: ["Higher Reduction Range", "Compact Two-Stage Layout", "Low-Speed Drive Applications"],
       },
       {
+        name: "NMRV Special Input Configuration",
+        features: ["Special Input Arrangement", "Compact Right-Angle Drive", "Drawing Confirmation Required"],
+      },
+      {
         name: "NRV Shaft-Input Worm Reducer",
         features: ["Shaft Input Design", "Flexible Motor Matching", "Compact Right-Angle Layout"],
+      },
+      {
+        name: "NRV Special Input Configuration",
+        features: ["Flexible Shaft Input", "Compact Right-Angle Drive", "Drawing Confirmation Required"],
       },
     ],
     faqs: [
@@ -54,7 +62,14 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
           "Inline Helical Transmission",
           "High Torque Capacity",
           "Flexible Motor Options",
-          "Robust Cast Iron Housing",
+        ],
+      },
+      {
+        name: "RF Flange-Mounted Helical Reducer",
+        features: [
+          "Direct Flange Mounting",
+          "Inline Helical Transmission",
+          "Flexible Motor Options",
         ],
       },
     ],
@@ -67,37 +82,37 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
       {
         question: "What is the difference between R Series and F Series?",
         answer:
-          "The R Series is an inline (coaxial) helical reducer where the input and output shafts share the same axis. The F Series is a parallel-shaft helical reducer where the input and output shafts run parallel but offset, making it more compact in height for applications requiring a lower profile.",
+          "R Series uses an inline helical layout. F Series uses a parallel-shaft helical layout. Use R when the motor and output shaft stay in a straight transmission path. Use F when the machine layout needs a parallel shaft or side-mounted arrangement.",
       },
       {
         question: "What is the difference between R Series and K Series?",
         answer:
-          "The R Series uses inline helical gears for high-efficiency, quiet, coaxial power transmission. The K Series is a helical-bevel gear reducer with a 90° shaft angle, suitable for applications requiring a right-angle drive with high torque density.",
+          "R Series is inline. K Series is right-angle helical-bevel. Use K when the machine requires 90-degree output and higher-efficiency bevel gear transmission.",
       },
       {
         question: "What is the difference between R Series and NMRV worm reducer?",
         answer:
-          "The R Series helical gear reducer offers significantly higher efficiency (up to 98% per stage) and handles higher power and torque ranges. NMRV worm reducers are more compact and cost-effective for lower-power, lower-speed applications but have lower efficiency due to sliding contact in the worm gear set.",
+          "R Series is an inline helical reducer. NMRV / RV is a compact right-angle worm gear reducer. Use R when the output remains inline; use NMRV when compact 90-degree worm gear reduction is required.",
       },
       {
         question: "Can R Series be supplied with a motor?",
         answer:
-          "Yes. Starshine can supply the R Series as a complete gearmotor unit with an IEC-standard electric motor (standard, brake, or VFD-rated). Motor power from 0.12 kW to 160 kW is available. Please specify the required output speed, torque, and motor voltage when enquiring.",
+          "Yes. R Series can be supplied as a geared motor package. Motor options may include standard motor, brake motor, variable-frequency motor, multi-speed motor, and other confirmed motor configurations.",
       },
       {
         question: "Can R Series be used with a frequency converter?",
         answer:
-          "Yes. The R Series is fully compatible with variable frequency drives (VFDs/inverters). For continuous operation below 25 Hz, forced cooling or an independent fan motor is recommended to maintain adequate cooling. Please specify VFD operation when ordering so the correct motor insulation class is selected.",
+          "A variable-frequency motor or inverter-compatible motor package should be reviewed when speed control is required. SV200 frequency converter and YVF motor options can be checked as part of the drive package.",
       },
       {
         question: "What information is needed before quotation?",
         answer:
-          "To prepare an accurate quotation, please provide: required output speed (r/min) or gear ratio, output torque (N·m) or motor power (kW), mounting position (foot, flange, or shaft-mounted), input configuration (direct motor, shaft, or flange), operating environment (temperature, humidity, duty cycle), and any special requirements such as IP rating, oil type, or output shaft dimensions.",
+          "Send motor power, input speed, required output speed, ratio, output torque, mounting form, input form, output shaft requirement, service factor, duty cycle, and working environment. For replacement, include the old nameplate and installation drawing.",
       },
       {
         question: "Can Starshine provide drawings and CAD files?",
         answer:
-          "Yes. 2D dimensional drawings (PDF/DWG) and 3D CAD models (STEP/IGES) are available for all standard R Series sizes. Please contact our technical team with the model number and required format. Custom CAD files for modified or special units are provided after order confirmation.",
+          "2D drawings and 3D CAD files can be requested after the reducer size, ratio, mounting form, output shaft, motor option, and installation direction are confirmed.",
       },
     ],
   },
@@ -144,6 +159,11 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
         question: "Can F Series be supplied with a motor?",
         answer:
           "Yes. F Series can be supplied as a geared motor package. Motor options may include standard motor, brake motor, variable-frequency motor, multi-speed motor, and other confirmed configurations.",
+      },
+      {
+        question: "Can F Series be used with a frequency converter?",
+        answer:
+          "A variable-frequency motor or inverter-compatible motor package should be reviewed when speed control is required. SV200 frequency converter and YVF motor options can be checked as part of the drive package.",
       },
       {
         question: "What information is needed before quotation?",
@@ -207,6 +227,11 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
           "Yes. K Series can be supplied as a geared motor package. Motor options may include standard motor, brake motor, variable-frequency motor, multi-speed motor, and other confirmed configurations.",
       },
       {
+        question: "Can K Series be used with a frequency converter?",
+        answer:
+          "A variable-frequency motor or inverter-compatible motor package should be reviewed when speed control is required. SV200 frequency converter and YVF motor options can be checked as part of the drive package.",
+      },
+      {
         question: "What information is needed before quotation?",
         answer:
           "Send motor power, input speed, required output speed, ratio, output torque, mounting form, shaft form, hollow shaft bore if required, torque arm requirement, duty cycle, and working environment. For replacement, include the old nameplate and installation drawing.",
@@ -221,7 +246,16 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
 
   "s-series-helical-worm-gear-reducer": {
     inputTypes: ["Direct Motor Input", "Shaft Input", "Flange Input", "IEC Motor Adapter", "Brake Motor", "VFD Motor Option"],
-    mountingVariants: [],
+    mountingVariants: [
+      {
+        name: "S Series Helical-Worm Reducer",
+        features: [
+          "Compact Right-Angle Layout",
+          "Smooth Low-Speed Drive",
+          "Economical Drive Solution",
+        ],
+      },
+    ],
     faqs: [
       {
         question: "Is S Series the same as NMRV worm reducer?",
@@ -272,7 +306,7 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
   },
 
   "rv-cast-iron-worm-gear-reducer": {
-    inputTypes: ["Direct Motor Input", "Shaft Input"],
+    inputTypes: ["Direct Motor Input", "Shaft Input", "Flange Input", "IEC Motor Adapter", "Right-Angle Worm Drive", "Heavy-Duty Cast Iron"],
     mountingVariants: [
       {
         name: "RV Foot-Mounted",
@@ -295,30 +329,50 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
     ],
     faqs: [
       {
-        question: "What is the key advantage of cast iron over aluminum?",
+        question: "Is NMRV the same as RV?",
         answer:
-          "Cast iron provides superior strength under shock loads, better heat dissipation at high duty cycles, and longer service life compared to aluminum housings.",
+          "NMRV and RV are commonly used naming directions for compact worm gear reducers. NMRV / RV refers to the same compact right-angle worm reducer product family. Old references such as SNW and SVF should be checked by model and drawing before replacement.",
       },
       {
-        question: "How many mounting positions does the RV Series support?",
+        question: "What is the ratio range of NMRV / RV worm gear reducers?",
         answer:
-          "Four standard mounting positions: B3 (foot mount), B5 (flange), B6 (wall, shaft up), and B7 (wall, shaft down).",
+          "The standard ratio range is commonly listed as 7.5–100, while older material also includes 5–100. Final ratio availability should be confirmed by reducer size and datasheet.",
       },
       {
-        question: "What is the worm wheel material?",
+        question: "What is the difference between NMRV and NRV?",
         answer:
-          "Phosphor bronze (PB2 grade) worm wheel — excellent anti-galling properties and long wear life against the hardened, ground steel worm shaft.",
+          "NMRV usually refers to motor-input worm reducer configurations. NRV is used when shaft input is required. The correct input form should be confirmed according to motor interface or machine-side input connection.",
       },
       {
-        question: "Can the RV Series be direct-coupled to a motor?",
+        question: "Can NMRV / RV be used with an electric motor?",
         answer:
-          "Yes. A standard IEC flanged input adapter is available for all RV frame sizes, enabling direct motor mounting without an intermediate coupling.",
+          "Yes. NMRV / RV can be configured with IEC motor input, compact motor input, square flange, or other supported motor interface options. Motor frame, power, voltage, speed, and flange size should be confirmed.",
+      },
+      {
+        question: "Can NMRV / RV be used for adjustable speed?",
+        answer:
+          "A standalone NMRV / RV reducer is a fixed-ratio reducer. For mechanical speed adjustment, review JWB+NMRV. For electronic speed control, review SV200 with a suitable motor and reducer combination.",
+      },
+      {
+        question: "What information is needed for replacement?",
+        answer:
+          "Send the existing model code, nameplate photo, ratio, output shaft diameter, flange size, mounting hole dimensions, output direction, and installation photos.",
+      },
+      {
+        question: "Can Starshine provide CAD or drawings?",
+        answer:
+          "2D drawings and 3D CAD files can be requested after the model, ratio, output shaft, flange, torque arm, and mounting position are confirmed.",
+      },
+      {
+        question: "When should SCK be considered instead of NMRV?",
+        answer:
+          "SCK should be reviewed when the application needs an RV-compatible right-angle reducer path with helical-hypoid transmission and higher-efficiency direction. Exact replacement should still be checked by mounting and shaft dimensions.",
       },
     ],
   },
 
   "compact-geared-motors": {
-    inputTypes: ["Direct Drive", "Inline Configuration"],
+    inputTypes: ["Direct Motor Input", "Shaft Input", "Flange Input", "IEC Motor Adapter", "Brake Motor", "VFD Motor Option"],
     mountingVariants: [
       {
         name: "Inline Geared Motor",
@@ -341,162 +395,240 @@ export const PRODUCT_CONFIGS: Record<string, ProductConfig> = {
     ],
     faqs: [
       {
-        question: "What is the difference between inline and right-angle geared motors?",
+        question: "Is NCJ the same as SNR?",
         answer:
-          "Inline geared motors have coaxial input/output for compact axial drives. Right-angle units redirect power 90°, ideal for space-constrained installations.",
+          "NCJ and SNR are used as related compact helical gearmotor naming directions in the available product materials. NCJ should be treated as the main product name, while SNR can be retained as a related naming reference when needed for replacement or old-document communication.",
       },
       {
-        question: "Is thermal protection built in?",
+        question: "What is the difference between NCJF and NCJT?",
         answer:
-          "Yes. A PTC thermistor embedded in the motor windings will trigger a controller shutdown if the motor exceeds its thermal limit — protecting the unit from overheating.",
+          "NCJF is handled as a flange-mounted NCJ configuration. NCJT is handled as a foot-mounted NCJ configuration. Both belong to the NCJ compact helical gearmotor family and should be confirmed by drawing.",
       },
       {
-        question: "Can a brake be added?",
+        question: "Can NCJ be used for variable-speed operation?",
         answer:
-          "Yes, a spring-applied electromagnetic brake is available on most frame sizes, providing parking brake and emergency stop capability without external components.",
+          "Yes, NCJ can be reviewed with a wide-frequency motor and frequency control. Product data refers to 20–60 Hz full-load operation under specified operating conditions. The inverter, motor type, torque, cooling, and duty cycle should be checked together.",
       },
       {
-        question: "What protection class is standard?",
+        question: "Can NCJ be used with a servo motor?",
         answer:
-          "IP54 is standard. IP65 is available on request for washdown environments, outdoor use, and dusty industrial applications.",
+          "AQA servo input is listed as an available input direction. Servo motor frame, flange size, shaft diameter, input speed, torque requirement, and control condition should be confirmed before drawing release.",
+      },
+      {
+        question: "When should RFKS be selected instead of NCJ?",
+        answer:
+          "RFKS should be reviewed when the application needs a larger modular reducer platform, higher torque range, more shaft arrangement options, or inline / parallel-shaft / right-angle configurations beyond compact NCJ gearmotor coverage.",
+      },
+      {
+        question: "When should SNKG be selected instead of NCJ?",
+        answer:
+          "SNKG should be reviewed when the application is ceramic glazing equipment or a ceramic line drive position requiring a dedicated bevel-helical geared motor structure.",
+      },
+      {
+        question: "What information is needed before quotation?",
+        answer:
+          "Send output speed, torque, motor power, ratio, mounting form, input form, output shaft requirement, installation position, terminal box position, and working environment. For replacement, send the old model and nameplate photo.",
+      },
+      {
+        question: "Can Starshine provide drawings and CAD files?",
+        answer:
+          "2D drawings and 3D CAD files can be requested after model, ratio, mounting form, motor option, shaft form, and installation position are confirmed.",
       },
     ],
   },
 
   "sck-helical-hypoid-gear-unit": {
-    inputTypes: ["Direct Motor Input", "Shaft Input", "Flange Input"],
+    inputTypes: ["Direct Motor Input", "Flange Input", "Square Flange Input", "Right-Angle Hypoid Output", "RV-Compatible Mounting", "Multi-Position Mounting"],
     mountingVariants: [
       {
-        name: "HB Foot-Mounted Unit",
+        name: "SCK75-AQA Servo-Input Gear Unit",
         features: [
-          "Hypoid Bevel Gear Stage",
-          "Up to 92% Efficiency",
-          "Ultra-Quiet Low Vibration",
-          "Large Input Shaft Offset",
+          "Servo Motor Connection",
+          "Efficient Hypoid Transmission",
+          "Compact Right-Angle Layout",
         ],
       },
       {
-        name: "HB Flange-Mounted Unit",
+        name: "SCK Round-Flange Configuration",
         features: [
-          "Right-Angle 90° Output",
-          "IP65 Standard Protection",
-          "Direct IEC Motor Mount",
-          "Compact Housing Envelope",
+          "Direct Flange Mounting",
+          "Compact Machine Interface",
+          "Flexible Mounting Positions",
+        ],
+      },
+      {
+        name: "SCK200 Larger-Frame Configuration",
+        features: [
+          "Extended Frame Option",
+          "Compact Right-Angle Drive",
+          "Engineering Review Required",
+        ],
+      },
+      {
+        name: "SCK200-SMT Motor Configuration",
+        features: [
+          "Integrated Motor Package",
+          "Compact Right-Angle Drive",
+          "Motor Matching Required",
         ],
       },
     ],
     faqs: [
       {
-        question: "What is the efficiency advantage of hypoid over worm gearboxes?",
+        question: "Is SCK the same as an RV worm gear reducer?",
         answer:
-          "Hypoid gear units achieve 88–92% efficiency vs 50–85% for worm reducers, resulting in significantly lower heat generation and reduced energy costs over time.",
+          "No. SCK is a helical-hypoid right-angle gear unit. RV / NMRV is a worm gear reducer family. SCK is relevant when the customer wants an RV-compatible mounting direction with a helical-hypoid transmission structure.",
       },
       {
-        question: "What does 'large shaft offset' mean?",
+        question: "Can SCK replace an RV worm gear reducer?",
         answer:
-          "The hypoid input and output shafts do not intersect — they are offset. This allows a more compact housing and offers greater mounting flexibility vs. bevel gears.",
+          "SCK can be reviewed for RV replacement or upgrade projects, but replacement should be confirmed by size, ratio, shaft diameter, flange dimensions, mounting hole position, output direction, and installation drawing.",
       },
       {
-        question: "Are hypoid gears noisy?",
+        question: "What is the main advantage of SCK compared with NMRV / RV?",
         answer:
-          "No. The curved hypoid tooth profile provides smooth, gradual tooth engagement, resulting in very low noise and vibration — quieter than equivalent bevel or worm units.",
+          "SCK provides a helical-hypoid transmission direction for customers who want to review higher efficiency and smoother right-angle transmission than a standard worm reducer layout. NMRV / RV remains suitable when a standard economical worm reducer is the priority.",
       },
       {
-        question: "What lubrication does the hypoid unit require?",
+        question: "What is the difference between SCK and K Series?",
         answer:
-          "Hypoid-specific EP gear oil rated GL-5 is mandatory. Standard GL-4 or industrial gear oil is NOT suitable and will cause rapid hypoid gear wear.",
+          "SCK is a compact RV-compatible helical-hypoid gear unit for small and medium drive positions. K Series is a larger modular helical-bevel right-angle reducer for broader torque and power coverage.",
+      },
+      {
+        question: "What is the difference between SCK and S Series?",
+        answer:
+          "SCK uses a helical-hypoid structure and is positioned around RV upgrade and compact right-angle transmission. S Series belongs to the RFKS family and uses a helical-worm structure.",
+      },
+      {
+        question: "Can SCK be supplied with a motor?",
+        answer:
+          "Yes. SCK can be reviewed with direct AC motor input and other motor interface configurations. When supplied as a motor-reducer package, motor frame, flange, shaft, voltage, speed, terminal box position, and drawing should be confirmed.",
+      },
+      {
+        question: "What does AQA mean on SCK configurations?",
+        answer:
+          "AQA should be treated as a servo adapter or flange-input direction. The exact flange dimensions, servo motor interface, input speed, and torque requirement should be confirmed by drawing.",
+      },
+      {
+        question: "Can SCK200 or SCK200-SMT be published as fixed models?",
+        answer:
+          "Current reliable project data supports SCK50–90 as the confirmed SCK range. SCK200 and SCK200-SMT should remain engineering-confirmation items until factory datasheets, drawings, and motor-reducer combination data are available.",
+      },
+      {
+        question: "Can Starshine provide drawings and CAD files?",
+        answer:
+          "2D drawings and 3D CAD files can be requested after the SCK size, ratio, input form, output shaft, mounting position, and motor interface are confirmed.",
       },
     ],
   },
 
   "sp-precision-planetary-gearbox": {
-    inputTypes: ["Servo Motor Flange", "Stepper Motor Flange", "Shaft Input"],
-    mountingVariants: [
-      {
-        name: "PL Inline Planetary",
-        features: [
-          "Coaxial Input / Output",
-          "Backlash < 3 arcmin (P1 Grade)",
-          "Lifetime Grease Lubrication",
-          "High Torsional Stiffness",
-        ],
-      },
-      {
-        name: "PL Right-Angle Planetary",
-        features: [
-          "Integrated Bevel Output Stage",
-          "Compact Right-Angle Envelope",
-          "Servo Motor Compatible",
-          "Low Backlash Maintained",
-        ],
-      },
-    ],
+    inputTypes: ["Servo Motor Input", "Low Backlash", "Planetary Gear Stage", "High Precision Output", "Compact Inline Design", "Ratio Options"],
+    mountingVariants: [],
     faqs: [
       {
-        question: "What does 'backlash < 3 arcmin' mean in practice?",
+        question: "Is SP Precision Planetary Gearbox the same as SPC Industrial Planetary Gearbox?",
         answer:
-          "The output shaft can rotate no more than 3 arc-minutes (0.05°) without input motion — critical for accurate positioning in CNC, robotics, and servo automation.",
+          "No. SP is for servo precision and low-backlash positioning. SPC is for heavy-duty industrial torque transmission.",
       },
       {
-        question: "How long does the lifetime lubrication last?",
+        question: "When should I choose SP instead of R Series?",
         answer:
-          "The grease-packed lubrication is designed for the full service life of the gearbox — typically 20,000+ hours under rated conditions — with zero maintenance required.",
+          "Choose SP when backlash, positioning accuracy, servo matching, and repeatable motion matter. Choose R Series for standard inline industrial speed reduction.",
       },
       {
-        question: "What motor brands are compatible?",
+        question: "When should I choose SP instead of SWD?",
         answer:
-          "Compatible with all major servo motor brands including Siemens, Fanuc, Yaskawa, Bosch Rexroth, Beckhoff, and Mitsubishi via standard IEC/NEMA flanges. Custom adapters available.",
+          "Choose SP for planetary servo axes with higher rigidity and precision positioning. Choose SWD when a low-backlash right-angle worm gearbox is preferred.",
       },
       {
-        question: "What is torsional stiffness and why does it matter?",
+        question: "What does backlash mean?",
         answer:
-          "Torsional stiffness measures resistance to twisting under load torque. High stiffness means better positioning repeatability and faster settling time in servo drive systems.",
+          "Backlash is the small angular clearance inside the gearbox. Lower backlash helps improve positioning repeatability and motion accuracy.",
+      },
+      {
+        question: "What is the difference between P0, P1, and P2?",
+        answer:
+          "P0 is the highest precision direction in this range. P1 is suitable for many precision servo axes. P2 is suitable for general precision motion where ultra-low backlash is not required.",
+      },
+      {
+        question: "Can SP be used with a servo motor?",
+        answer:
+          "Yes. Servo motor matching should confirm flange, shaft diameter, shaft length, rated speed, rated torque, peak torque, brake, encoder, inertia, and adapter dimensions.",
+      },
+      {
+        question: "Can SP be used with a stepper motor?",
+        answer:
+          "Yes, if the frame, shaft, torque, speed, and control requirements are confirmed.",
+      },
+      {
+        question: "What information is needed before quotation?",
+        answer:
+          "Send servo motor brand and model, motor power, rated speed, peak torque, required ratio, backlash class, output torque, load inertia, radial load, axial load, mounting direction, output form, duty cycle, working environment, and machine drawing.",
       },
     ],
   },
 
   "cycloidal-gear-reducer": {
-    inputTypes: ["Direct Motor Input", "Shaft Input"],
+    inputTypes: ["Direct Motor Input", "Shaft Input", "Flange Input", "Cycloidal Pinwheel Structure", "Shock Load Resistance", "Large Ratio / Low Speed"],
     mountingVariants: [
       {
-        name: "X Series Single-Stage",
+        name: "BWD Cycloidal Gear Reducer",
         features: [
-          "Eccentric Cam Mechanism",
-          "500% Shock Load Capacity",
-          "Near-Zero Backlash (< 1 arcmin)",
-          "High Single-Stage Ratio (6–87)",
+          "Large Reduction Ratio",
+          "Strong Shock Resistance",
+          "Frequent Start-Stop Duty",
         ],
       },
       {
-        name: "X Series Double-Stage",
+        name: "BLY1 Cycloidal Gear Reducer",
         features: [
-          "Ultra-High Ratio up to 7,569",
-          "Compact Combined Housing",
-          "Continuous / Intermittent Duty",
-          "Long Low-Maintenance Life",
+          "Compact Coaxial Layout",
+          "Large Reduction Ratio",
+          "Frequent Start-Stop Duty",
         ],
       },
     ],
     faqs: [
       {
-        question: "What is the single-stage ratio range?",
+        question: "What is a cycloidal gear reducer used for?",
         answer:
-          "A single-stage cycloidal reducer achieves ratios from 6:1 to 87:1. Double-stage units (two cycloidal sets in series) reach up to 7,569:1.",
+          "A cycloidal gear reducer is used for industrial low-speed transmission where large reduction ratio, compact coaxial structure, shock-load resistance, frequent start-stop operation, and reversing duty are important.",
       },
       {
-        question: "How does the cycloidal reducer handle shock loads?",
+        question: "What is the difference between cycloidal reducer and helical reducer?",
         answer:
-          "Multiple contact points (typically 2/3 of the pins are simultaneously engaged) distribute shock loads across the mechanism, providing up to 500% of rated torque shock capacity.",
+          "Cycloidal reducers use cycloidal pinwheel transmission and multi-tooth meshing. Helical reducers use involute helical gear stages. Cycloidal reducers are often reviewed for high-ratio, shock-load, and dynamic-duty applications, while helical reducers are often selected for efficient modular geared motor packages.",
       },
       {
-        question: "Is the cycloidal reducer suitable for continuous operation?",
+        question: "What is the difference between cycloidal reducer and NMRV worm reducer?",
         answer:
-          "Yes, it is rated for both continuous and intermittent duty. The rolling-contact mechanism generates far less heat than sliding-contact worm gears under sustained load.",
+          "Cycloidal reducers are coaxial reducers. NMRV / RV worm reducers are compact right-angle reducers. Use cycloidal reducers when the input and output need to stay aligned; use NMRV / RV when the machine requires 90-degree transmission.",
       },
       {
-        question: "How does backlash compare to a planetary gearbox?",
+        question: "What ratio range is available?",
         answer:
-          "Cycloidal reducers typically achieve < 1 arcmin backlash — better than most standard planetary gearboxes — making them excellent for indexing and precision positioning.",
+          "The available product data lists single-stage ratio 1/9–1/87 and double-stage ratio 1/99–1/7569. Final ratio availability should be confirmed by model size and datasheet.",
+      },
+      {
+        question: "Can this reducer handle frequent start-stop and reversing?",
+        answer:
+          "Yes, the cycloidal reducer product direction is suitable for frequent start-stop and reversing operation when the model is selected correctly for torque, service factor, duty cycle, and shock load.",
+      },
+      {
+        question: "What mounting forms are available?",
+        answer:
+          "Available mounting directions include foot-mounted, flange-mounted, and vertical F-flange configurations. Final mounting dimensions and shaft direction should be confirmed by drawing.",
+      },
+      {
+        question: "What information is needed before quotation?",
+        answer:
+          "Send motor power, input speed, required output speed, ratio, output torque, mounting form, input form, output shaft direction, duty cycle, starts per hour, working environment, and any existing nameplate or drawing.",
+      },
+      {
+        question: "Can Starshine provide drawings and CAD files?",
+        answer:
+          "2D drawings and 3D CAD files can be requested after model, ratio, stage configuration, mounting form, output shaft direction, and input form are confirmed.",
       },
     ],
   },

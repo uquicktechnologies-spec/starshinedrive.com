@@ -479,9 +479,9 @@ export async function guardedDownload(key: string, fn: () => Promise<void>): Pro
 /**
  * Opens a quotation PDF in a new tab via an authenticated fetch instead of a
  * plain <a href> navigation. Direct top-level navigations to the API don't
- * reliably carry the Clerk dev-instance session in this environment, so we
- * fetch with credentials (same as the rest of the app's API calls) and hand
- * the browser a blob URL instead.
+ * reliably carry the session cookie in this environment, so we fetch with
+ * credentials (same as the rest of the app's API calls) and hand the browser
+ * a blob URL instead.
  */
 export async function openQuotationPdf(quotationId: number): Promise<void> {
   return guardedDownload(`quotation-pdf-${quotationId}`, async () => {

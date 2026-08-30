@@ -1,0 +1,1866 @@
+# DYNAMIC PRODUCT PAGE + CATEGORY MANAGEMENT
+
+## COMPLETE REPLIT IMPLEMENTATION SPECIFICATION
+
+## 1. OBJECTIVE
+
+Create a fully dynamic Product Management and Product Page system for the website.
+
+The system must have:
+
+1. Category Management
+2. Product Management
+3. Dynamic Product Page
+4. Dynamic Header
+5. Dynamic Technical Database
+6. Dynamic Product Left Section
+7. Dynamic Product Right Section
+8. Dynamic Typical Applications section
+9. Dynamic Related Products
+10. Dynamic Features
+11. Dynamic Images/Gallery
+12. Dynamic Videos
+13. Dynamic FAQ
+14. Dynamic SEO
+15. Publish / Unpublish
+16. Product Preview
+17. Mobile Responsive Design
+
+IMPORTANT:
+
+DO NOT create separate hard-coded pages for individual products.
+
+Every product page must be generated from database data.
+
+==================================================
+2. REMOVE PREVIOUS PRODUCT PAGE IMPLEMENTATION
+==============================================
+
+Before implementation:
+
+* Audit the existing Product Page code.
+* Identify all hard-coded product names, descriptions, prices, images and specifications.
+* Remove the old hard-coded product-page rendering logic.
+* Do not duplicate old and new Product Page systems.
+* Keep existing website authentication and common layout where compatible.
+* Replace only the Product/Category architecture with the new dynamic system.
+* Existing URLs should continue working where possible.
+
+The final system must have ONE dynamic Product Page engine.
+
+==================================================
+3. URL STRUCTURE
+================
+
+Category:
+
+/products/{category-slug}
+
+Product:
+
+/product/{product-slug}
+
+Examples:
+
+/products/windows-repair
+
+/product/restorex360-premium
+
+/product/ctrlone-enterprise
+
+The slug must be automatically generated from the product/category name but editable by Admin.
+
+Prevent duplicate slugs.
+
+==================================================
+4. CATEGORY MANAGEMENT
+======================
+
+Create:
+
+ADMIN PANEL
+→ Product Management
+→ Categories
+
+Fields:
+
+* Category Name
+* Slug
+* Category Code
+* Short Description
+* Full Description
+* Category Image
+* Banner Image
+* Icon
+* Parent Category
+* Display Order
+* Featured
+* Status
+* SEO Title
+* SEO Description
+* SEO Keywords
+* OG Image
+* Created Date
+* Updated Date
+
+Actions:
+
+* Add
+* Edit
+* Duplicate
+* Preview
+* Publish
+* Unpublish
+* Delete
+
+Do not allow deletion of a category that contains products unless Admin explicitly confirms how those products should be handled.
+
+==================================================
+5. PRODUCT MANAGEMENT
+=====================
+
+Create:
+
+ADMIN PANEL
+→ Product Management
+→ Products
+
+Basic Fields:
+
+* Product Name
+* Product Code
+* SKU
+* Category
+* Sub Category
+* Slug
+* Short Description
+* Full Description
+* Product Logo
+* Main Product Image
+* Product Badge
+* Version
+* Product Status
+* Featured Product
+* Display Order
+
+Status:
+
+* Draft
+* Published
+* Unpublished
+* Archived
+
+Admin actions:
+
+* Add Product
+* Edit Product
+* Duplicate Product
+* Preview
+* Publish
+* Unpublish
+* Archive
+* Delete
+
+==================================================
+6. DYNAMIC PRODUCT HEADER
+=========================
+
+Every Product Page must have a dynamic Header.
+
+Fields:
+
+* Product Name
+* Product Logo
+* Product Badge
+* Tagline
+* Short Description
+* Version
+* Category
+* Background Image
+* Background Video
+* Primary Button Text
+* Primary Button URL
+* Secondary Button Text
+* Secondary Button URL
+
+Example:
+
+PRODUCT NAME
+
+RestoreX360 Premium
+
+TAGLINE
+
+Smart Windows Repair & Instant System Recovery
+
+DESCRIPTION
+
+Dynamic description loaded from database.
+
+BUTTON:
+
+Buy Now
+
+SECONDARY:
+
+Free Trial
+
+Do not hard-code any product-specific information.
+
+==================================================
+7. PRODUCT PAGE LAYOUT
+======================
+
+Create the following structure:
+
+HEADER
+↓
+PRODUCT INTRODUCTION
+↓
+PRODUCT LEFT + PRODUCT RIGHT
+↓
+TECHNICAL DATABASE
+↓
+KEY FEATURES
+↓
+TYPICAL APPLICATIONS
+↓
+PRODUCT GALLERY
+↓
+PRODUCT VIDEO
+↓
+FAQ
+↓
+RELATED PRODUCTS
+↓
+CTA
+↓
+FOOTER
+
+All sections must be controlled through the Admin Panel.
+
+==================================================
+8. PRODUCT LEFT SECTION
+=======================
+
+Create a configurable Product Left section.
+
+Possible content:
+
+* Main Product Image
+* Product Gallery
+* Screenshot
+* Video Thumbnail
+* Description
+* Feature List
+* Rich Text
+* Icons
+* Download Button
+* Documentation Button
+
+Admin should be able to control:
+
+* Section title
+* Description
+* Image
+* Image position
+* Button
+* Visibility
+* Display order
+
+==================================================
+9. PRODUCT RIGHT SECTION
+========================
+
+Create a configurable right-side Product Information/Purchase panel.
+
+Fields:
+
+* Product Edition
+* License Type
+* License Duration
+* Number of PCs
+* Price
+* MRP
+* Discount
+* GST
+* Currency
+* Availability
+* CTA Text
+* CTA URL
+* Trial Button
+* Contact Sales Button
+
+Example:
+
+RestoreX360 Premium
+
+1 PC
+
+1 Year License
+
+MRP: ₹XXXX
+
+Offer Price: ₹XXXX
+
+[BUY NOW]
+
+[FREE TRIAL]
+
+The Admin must be able to enable/disable each field.
+
+Do not hard-code currency, pricing or license information.
+
+==================================================
+10. TECHNICAL DATABASE
+======================
+
+Create a completely dynamic Technical Database.
+
+DO NOT create fixed columns such as RAM, CPU, OS directly inside the frontend.
+
+Instead create:
+
+TECHNICAL SPECIFICATION GROUP
+
+Example:
+
+System Requirements
+
+Fields:
+
+Operating System
+Windows 10 / Windows 11
+
+Processor
+2 GHz or higher
+
+RAM
+4 GB minimum
+
+Storage
+Dynamic
+
+Architecture
+64-bit
+
+==================================================
+11. TECHNICAL DATABASE ADMIN
+============================
+
+Admin should be able to create:
+
+Specification Group
+
+Example:
+
+System Requirements
+
+Then add unlimited fields:
+
+Field Name:
+Operating System
+
+Field Value:
+Windows 10 / Windows 11
+
+Field Type:
+
+* Text
+* Number
+* Boolean
+* URL
+* Rich Text
+
+Display Order:
+
+1
+
+Status:
+
+Active
+
+This allows every product to have different technical specifications.
+
+==================================================
+12. PRODUCT FEATURES
+====================
+
+Create dynamic Features.
+
+Fields:
+
+* Feature Title
+* Feature Description
+* Feature Icon
+* Feature Image
+* Feature URL
+* Display Order
+* Status
+
+Admin can add unlimited features.
+
+Example:
+
+Instant Restore
+
+Windows Repair
+
+Snapshot Protection
+
+Windows Update Control
+
+System Recovery
+
+==================================================
+13. TYPICAL APPLICATIONS
+========================
+
+Create a dynamic section named:
+
+TYPICAL APPLICATIONS
+
+Admin can create unlimited applications.
+
+Fields:
+
+* Application Title
+* Short Description
+* Full Description
+* Application Image
+* Icon
+* Industry
+* Use Case
+* Benefits
+* Display Order
+* Status
+
+Example:
+
+Computer Repair Shops
+
+IT Departments
+
+System Administrators
+
+Enterprise IT
+
+Educational Institutions
+
+==================================================
+14. PRODUCT GALLERY
+===================
+
+Create:
+
+Product Gallery
+
+Fields:
+
+* Image
+* Image Title
+* Alt Text
+* Caption
+* Display Order
+* Status
+
+Support multiple images.
+
+Admin should be able to:
+
+* Upload
+* Delete
+* Reorder
+* Replace
+* Add Alt Text
+
+Images must be optimized for website performance.
+
+==================================================
+15. PRODUCT VIDEO
+=================
+
+Support:
+
+* YouTube URL
+* Vimeo URL
+* Self-hosted video URL
+* Video Thumbnail
+* Video Title
+* Description
+
+Admin controls whether the video is displayed.
+
+Do not automatically load heavy video files on page load.
+
+Use lazy loading.
+
+==================================================
+16. PRODUCT FAQ
+===============
+
+Create dynamic FAQ.
+
+Fields:
+
+Question
+
+Answer
+
+Display Order
+
+Status
+
+Admin can add unlimited FAQ questions.
+
+FAQ should be rendered using an accordion.
+
+Where appropriate, generate valid FAQ structured data for SEO.
+
+==================================================
+17. RELATED PRODUCTS
+====================
+
+Create automatic and manual Related Products.
+
+Automatic rules:
+
+1. Same Category
+2. Same Sub Category
+3. Matching Tags
+4. Featured products
+
+Admin can also manually select related products.
+
+Fields:
+
+* Product ID
+* Related Product ID
+* Display Order
+* Relationship Type
+* Status
+
+Relationship Type:
+
+* Automatic
+* Manual
+
+Manual selection must override automatic selection when configured.
+
+Do not allow a product to relate to itself.
+
+==================================================
+18. PRODUCT TAGS
+================
+
+Create Product Tags.
+
+Example:
+
+Windows Repair
+
+Backup
+
+Recovery
+
+Enterprise
+
+Security
+
+Endpoint
+
+System Management
+
+Admin can assign multiple tags to products.
+
+Tags can be used for Related Product logic.
+
+==================================================
+19. PRODUCT SECTION BUILDER
+===========================
+
+Create a section manager for every product.
+
+Admin should see:
+
+PRODUCT PAGE SECTIONS
+
+1. Header
+2. Introduction
+3. Product Left
+4. Product Right
+5. Technical Database
+6. Features
+7. Typical Applications
+8. Gallery
+9. Video
+10. FAQ
+11. Related Products
+12. CTA
+
+Each section must have:
+
+* Enabled / Disabled
+* Display Order
+* Section Title
+* Section Subtitle
+* Custom Content where applicable
+
+Admin must be able to change the order.
+
+Example:
+
+Header
+↓
+Product Left/Right
+↓
+Features
+↓
+Technical Database
+↓
+Applications
+↓
+Related Products
+
+The frontend must respect the configured order.
+
+==================================================
+20. SEO MANAGEMENT
+==================
+
+Every Category and Product must have independent SEO.
+
+Fields:
+
+* SEO Title
+* Meta Description
+* Meta Keywords
+* Canonical URL
+* OG Title
+* OG Description
+* OG Image
+* Twitter/X Title
+* Twitter/X Description
+* Twitter/X Image
+* Robots Index
+* Robots Follow
+
+Generate:
+
+* Product structured data where applicable
+* Breadcrumb structured data
+* Organization/Product information where valid
+
+Do not generate misleading structured data.
+
+==================================================
+21. DATABASE STRUCTURE
+======================
+
+Use relational database structure.
+
+Recommended tables:
+
+categories
+
+products
+
+product_sections
+
+product_specification_groups
+
+product_specifications
+
+product_features
+
+product_applications
+
+product_images
+
+product_videos
+
+product_faqs
+
+product_tags
+
+product_tag_relations
+
+product_related_products
+
+product_pricing
+
+product_seo
+
+==================================================
+22. PRODUCTS TABLE
+==================
+
+Recommended fields:
+
+id
+
+category_id
+
+name
+
+slug
+
+product_code
+
+sku
+
+short_description
+
+full_description
+
+logo_url
+
+main_image_url
+
+badge
+
+version
+
+status
+
+featured
+
+display_order
+
+created_at
+
+updated_at
+
+==================================================
+23. PRODUCT SECTIONS TABLE
+==========================
+
+Fields:
+
+id
+
+product_id
+
+section_type
+
+title
+
+subtitle
+
+content
+
+enabled
+
+display_order
+
+created_at
+
+updated_at
+
+section_config_json
+
+Use section_config_json only for flexible presentation/configuration data.
+
+Do not put the entire product database inside one JSON field.
+
+Core searchable data must remain relational.
+
+==================================================
+24. TECHNICAL SPECIFICATION TABLES
+==================================
+
+product_specification_groups
+
+id
+
+product_id
+
+group_name
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+product_specifications
+
+id
+
+group_id
+
+field_name
+
+field_value
+
+field_type
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+==================================================
+25. PRODUCT FEATURES TABLE
+==========================
+
+id
+
+product_id
+
+title
+
+description
+
+icon_url
+
+image_url
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+==================================================
+26. PRODUCT APPLICATIONS TABLE
+==============================
+
+id
+
+product_id
+
+title
+
+short_description
+
+description
+
+image_url
+
+icon_url
+
+industry
+
+use_case
+
+benefits
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+==================================================
+27. PRODUCT IMAGES TABLE
+========================
+
+id
+
+product_id
+
+image_url
+
+title
+
+alt_text
+
+caption
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+==================================================
+28. PRODUCT FAQ TABLE
+=====================
+
+id
+
+product_id
+
+question
+
+answer
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+==================================================
+29. PRODUCT RELATED TABLE
+=========================
+
+id
+
+product_id
+
+related_product_id
+
+relationship_type
+
+display_order
+
+enabled
+
+created_at
+
+updated_at
+
+Add a unique constraint preventing duplicate product relationships.
+
+==================================================
+30. ADMIN PRODUCT EDITOR
+========================
+
+Create a modern Admin Product Editor.
+
+Tabs:
+
+GENERAL
+
+HEADER
+
+CONTENT
+
+PRODUCT LEFT
+
+PRODUCT RIGHT
+
+TECHNICAL DATABASE
+
+FEATURES
+
+APPLICATIONS
+
+GALLERY
+
+VIDEO
+
+FAQ
+
+RELATED PRODUCTS
+
+SEO
+
+PUBLISH
+
+Each tab saves independently.
+
+Show:
+
+Save Draft
+
+Preview
+
+Publish
+
+Unpublish
+
+Archive
+
+Delete
+
+Do not lose unsaved data when switching tabs.
+
+Display clear success/error messages.
+
+==================================================
+31. LIVE PREVIEW
+================
+
+Create:
+
+Preview Product
+
+The preview should show the actual Product Page using current draft data.
+
+Preview must not require publishing.
+
+Use a secure preview mechanism.
+
+Do not expose unpublished products publicly.
+
+==================================================
+32. FRONTEND REQUIREMENTS
+=========================
+
+Product page must:
+
+* Be fully responsive
+* Work on desktop
+* Work on tablet
+* Work on mobile
+* Have optimized image loading
+* Use lazy loading where appropriate
+* Avoid layout shifts
+* Have accessible buttons
+* Have accessible images
+* Support keyboard navigation
+* Use semantic HTML
+
+Do not duplicate components for individual products.
+
+==================================================
+33. DESIGN REQUIREMENT
+======================
+
+Create a modern professional product page.
+
+Use:
+
+* Clean typography
+* Strong product hero
+* Modern cards
+* Clear CTA
+* Technical specification tables
+* Responsive two-column product section
+* Application cards
+* Related product cards
+* Consistent spacing
+* Professional enterprise/SaaS appearance
+
+The design must be reusable across every product.
+
+Do not create a design that only works for one product.
+
+==================================================
+34. RESPONSIVE PRODUCT LEFT/RIGHT
+=================================
+
+Desktop:
+
+LEFT 55%
+
+RIGHT 45%
+
+Mobile:
+
+LEFT
+
+then
+
+RIGHT
+
+Do not squeeze the two panels into a single narrow row on mobile.
+
+==================================================
+35. CATEGORY PAGE
+=================
+
+Category page should dynamically display:
+
+Category Banner
+
+Category Name
+
+Category Description
+
+Products in Category
+
+Product Cards
+
+Featured Products
+
+Related Categories
+
+SEO content
+
+Product cards should display:
+
+* Product Image
+* Product Name
+* Short Description
+* Badge
+* Version
+* CTA
+
+Example:
+
+Windows Repair
+
+[RestoreX360 Lite]
+
+[RestoreX360 Professional]
+
+[RestoreX360 Premium]
+
+==================================================
+36. PRODUCT SEARCH
+==================
+
+Create product search.
+
+Search by:
+
+* Product Name
+* Product Code
+* SKU
+* Category
+* Tags
+
+Admin search should support filtering:
+
+Category
+
+Status
+
+Featured
+
+Published
+
+Draft
+
+Archived
+
+==================================================
+37. PRODUCT DUPLICATION
+=======================
+
+Create:
+
+Duplicate Product
+
+When duplicating:
+
+* Copy basic information
+* Copy sections
+* Copy specifications
+* Copy features
+* Copy applications
+* Copy gallery references where appropriate
+* Copy FAQ
+* Copy SEO
+
+Generate a NEW slug.
+
+Do not duplicate product ID, SKU or unique product code.
+
+==================================================
+38. SECURITY
+============
+
+Only authorized Admin users can:
+
+* Create products
+* Edit products
+* Delete products
+* Publish products
+* Modify prices
+* Modify SEO
+* Manage categories
+
+Validate all input server-side.
+
+Do not rely only on frontend validation.
+
+Prevent unauthorized API access.
+
+Sanitize rich text content.
+
+Protect against:
+
+* SQL injection
+* XSS
+* CSRF where applicable
+* Unauthorized product modification
+* Unauthorized file uploads
+
+==================================================
+39. AUDIT LOG
+=============
+
+Record important product changes.
+
+Audit fields:
+
+* User
+* Action
+* Product
+* Old Value
+* New Value
+* Date/Time
+* IP where appropriate and legally permitted
+
+Actions:
+
+Created
+
+Updated
+
+Published
+
+Unpublished
+
+Deleted
+
+Price Changed
+
+SEO Changed
+
+==================================================
+40. API STRUCTURE
+=================
+
+Create clean APIs.
+
+Examples:
+
+GET /api/categories
+
+POST /api/categories
+
+PUT /api/categories/:id
+
+DELETE /api/categories/:id
+
+GET /api/products
+
+POST /api/products
+
+GET /api/products/:id
+
+PUT /api/products/:id
+
+DELETE /api/products/:id
+
+GET /api/products/slug/:slug
+
+GET /api/products/:id/specifications
+
+GET /api/products/:id/features
+
+GET /api/products/:id/applications
+
+GET /api/products/:id/gallery
+
+GET /api/products/:id/faq
+
+GET /api/products/:id/related
+
+==================================================
+41. CACHING / PERFORMANCE
+=========================
+
+Product pages should load quickly.
+
+Implement appropriate caching.
+
+Do not query every table repeatedly if data can safely be loaded together.
+
+Use optimized queries.
+
+Avoid N+1 database queries.
+
+Images should use:
+
+* Proper dimensions
+* Compression
+* WebP/AVIF where supported
+* Lazy loading
+
+==================================================
+42. ERROR HANDLING
+==================
+
+If product does not exist:
+
+Show proper 404 Product Not Found page.
+
+If product is unpublished:
+
+Do not display publicly.
+
+If related product was deleted:
+
+Automatically remove or ignore invalid relationship.
+
+If image is missing:
+
+Show a safe fallback image.
+
+If optional section has no content:
+
+Do not render an empty section.
+
+==================================================
+43. SEO URL RULES
+=================
+
+Slug examples:
+
+restorex360-premium
+
+ctrlone-enterprise
+
+windows-repair-tools
+
+Rules:
+
+* lowercase
+* hyphen separated
+* no spaces
+* no special characters
+* unique
+
+When changing a published slug:
+
+Create an appropriate redirect from the old URL if the website architecture supports redirects.
+
+Do not silently break existing indexed URLs.
+
+==================================================
+44. PRODUCT PAGE DATA FLOW
+==========================
+
+REQUEST:
+
+/product/restorex360-premium
+
+↓
+
+Find Product by Slug
+
+↓
+
+Validate Published Status
+
+↓
+
+Load Category
+
+↓
+
+Load Header
+
+↓
+
+Load Product Left
+
+↓
+
+Load Product Right
+
+↓
+
+Load Technical Database
+
+↓
+
+Load Features
+
+↓
+
+Load Applications
+
+↓
+
+Load Gallery
+
+↓
+
+Load Video
+
+↓
+
+Load FAQ
+
+↓
+
+Load Related Products
+
+↓
+
+Load SEO
+
+↓
+
+Render Dynamic Product Page
+
+==================================================
+45. IMPORTANT: NO HARDCODING
+============================
+
+The following must NEVER be hard-coded into the Product Page component:
+
+* Product Name
+* Product Description
+* Product Price
+* Product Version
+* Product Image
+* Technical Specifications
+* Features
+* Applications
+* FAQ
+* Related Products
+* SEO Title
+* SEO Description
+
+All must come from the database/CMS.
+
+==================================================
+46. ADMIN DASHBOARD PRODUCT LIST
+================================
+
+Columns:
+
+Product
+
+Category
+
+SKU
+
+Status
+
+Featured
+
+Version
+
+Updated
+
+Actions
+
+Actions:
+
+Edit
+
+Preview
+
+Duplicate
+
+Publish
+
+Unpublish
+
+Archive
+
+Delete
+
+Add filters and search.
+
+==================================================
+47. PRODUCT STATUS WORKFLOW
+===========================
+
+DRAFT
+
+↓
+
+PREVIEW
+
+↓
+
+PUBLISHED
+
+or
+
+DRAFT
+
+↓
+
+ARCHIVED
+
+Published products can be:
+
+UNPUBLISHED
+
+ARCHIVED
+
+Deleted only with confirmation.
+
+==================================================
+48. CATEGORY → PRODUCT RELATIONSHIP
+===================================
+
+Every product should belong to a category.
+
+Optional:
+
+Sub Category
+
+A category can contain unlimited products.
+
+A product cannot be published without a valid category unless Admin explicitly enables a category-less product type.
+
+==================================================
+49. RELATED PRODUCT ALGORITHM
+=============================
+
+Priority:
+
+1. Manual Related Products
+2. Same Sub Category
+3. Same Category
+4. Matching Tags
+5. Featured Products
+
+Limit frontend output to a configurable number, default:
+
+4 products
+
+Do not display the current product.
+
+==================================================
+50. CONTENT EDITOR
+==================
+
+For long descriptions and application descriptions, provide a safe rich-text editor.
+
+Supported:
+
+* Heading
+* Paragraph
+* Bold
+* Italic
+* Lists
+* Links
+* Images where appropriate
+* Tables where appropriate
+
+Sanitize HTML before saving/rendering.
+
+==================================================
+51. MEDIA MANAGER
+=================
+
+Create a reusable Media Manager.
+
+Admin can:
+
+* Upload image
+* Replace image
+* Delete image
+* Search image
+* Preview image
+* Add alt text
+* Add title
+* Copy media URL
+
+Validate:
+
+* File type
+* File size
+* Image dimensions
+
+Do not allow dangerous executable files to be uploaded as media.
+
+==================================================
+52. PRODUCT PAGE COMPONENT ARCHITECTURE
+=======================================
+
+Use reusable components similar to:
+
+ProductPage
+
+ProductHeader
+
+ProductIntroduction
+
+ProductSplitSection
+
+ProductTechnicalDatabase
+
+ProductFeatures
+
+ProductApplications
+
+ProductGallery
+
+ProductVideo
+
+ProductFAQ
+
+RelatedProducts
+
+ProductCTA
+
+Breadcrumbs
+
+Each component receives dynamic data.
+
+==================================================
+53. ADMIN COMPONENT ARCHITECTURE
+================================
+
+Use reusable components:
+
+ProductList
+
+ProductEditor
+
+CategoryList
+
+CategoryEditor
+
+SpecificationEditor
+
+FeatureEditor
+
+ApplicationEditor
+
+GalleryManager
+
+VideoManager
+
+FAQManager
+
+RelatedProductManager
+
+SEOEditor
+
+SectionManager
+
+PreviewProduct
+
+==================================================
+54. TESTING
+===========
+
+Before marking implementation complete, test at least:
+
+1. Create Category
+2. Edit Category
+3. Delete Category
+4. Create Product
+5. Edit Product
+6. Duplicate Product
+7. Save Draft
+8. Preview Draft
+9. Publish Product
+10. Unpublish Product
+11. Archive Product
+12. Delete Product
+13. Change Product Slug
+14. Add Technical Specification
+15. Add Feature
+16. Add Typical Application
+17. Add Gallery
+18. Add Video
+19. Add FAQ
+20. Add Related Product
+21. Remove Related Product
+22. Change Section Order
+23. Disable Section
+24. Enable Section
+25. Edit SEO
+26. Test Category Page
+27. Test Product Page
+28. Test Mobile
+29. Test Tablet
+30. Test Desktop
+31. Test invalid product URL
+32. Test unpublished product URL
+33. Test unauthorized admin API access
+34. Test duplicate slug
+35. Test duplicate SKU
+36. Test missing image
+37. Test deleted related product
+38. Test empty optional section
+
+==================================================
+55. DATABASE MIGRATION
+======================
+
+Before modifying production data:
+
+* Backup database
+* Create migration
+* Test migration
+* Verify existing products
+* Verify existing categories
+* Verify existing URLs
+
+Do not delete existing production data automatically.
+
+If existing product data exists, migrate it into the new structure.
+
+==================================================
+56. FINAL ACCEPTANCE CRITERIA
+=============================
+
+The implementation is complete only when:
+
+✓ Admin can create unlimited categories
+
+✓ Admin can create unlimited products
+
+✓ Product pages are generated dynamically
+
+✓ No product-specific hard-coded page exists
+
+✓ Header is dynamic
+
+✓ Technical Database is dynamic
+
+✓ Product Left is dynamic
+
+✓ Product Right is dynamic
+
+✓ Typical Applications are dynamic
+
+✓ Related Products are dynamic
+
+✓ Features are dynamic
+
+✓ Gallery is dynamic
+
+✓ Video is dynamic
+
+✓ FAQ is dynamic
+
+✓ SEO is dynamic
+
+✓ Product sections can be enabled/disabled
+
+✓ Product sections can be reordered
+
+✓ Product preview works before publishing
+
+✓ Draft/Published/Archived workflow works
+
+✓ Category pages are dynamic
+
+✓ Product search works
+
+✓ Related-product logic works
+
+✓ Mobile responsive design works
+
+✓ Security validation works
+
+✓ Existing data is protected
+
+✓ Existing valid URLs are preserved or redirected
+
+✓ No duplicate Product Page engine remains
+
+==================================================
+57. REPLIT IMPLEMENTATION RULE
+==============================
+
+IMPORTANT FOR REPLIT:
+
+Do not simply create the frontend UI.
+
+First inspect the existing project architecture and database.
+
+Then:
+
+PHASE 1
+Audit existing Product/Category code.
+
+PHASE 2
+Create database migrations/models.
+
+PHASE 3
+Create Admin Category Management.
+
+PHASE 4
+Create Admin Product Management.
+
+PHASE 5
+Create Technical Database.
+
+PHASE 6
+Create Product Section Manager.
+
+PHASE 7
+Create Dynamic Product API.
+
+PHASE 8
+Create Dynamic Product Frontend.
+
+PHASE 9
+Create Related Product engine.
+
+PHASE 10
+Create SEO.
+
+PHASE 11
+Migrate existing data.
+
+PHASE 12
+Run complete testing.
+
+PHASE 13
+Remove obsolete hard-coded Product Page code.
+
+PHASE 14
+Final security and performance audit.
+
+DO NOT BREAK EXISTING WEBSITE FEATURES.
+
+DO NOT REMOVE EXISTING DATA.
+
+DO NOT CREATE DUPLICATE ROUTES.
+
+DO NOT CREATE DUPLICATE PRODUCT SYSTEMS.
+
+==================================================
+58. FINAL REQUEST TO REPLIT
+===========================
+
+Implement this entire system in the existing project.
+
+Before coding, inspect the existing codebase and identify the current:
+
+* Framework
+* Database
+* Authentication
+* Admin Panel
+* Product system
+* Category system
+* Routing
+* Media storage
+* SEO implementation
+
+Use the existing architecture wherever practical.
+
+Do not blindly replace working infrastructure.
+
+Build the new Dynamic Product Page system as a clean, maintainable, reusable module.
+
+After implementation, provide:
+
+1. Files created
+2. Files modified
+3. Database migrations
+4. API routes
+5. Admin routes
+6. Frontend routes
+7. Any environment variables required
+8. Existing data migration status
+9. Testing results
+10. Any remaining issues
+
+MOST IMPORTANT:
+
+ONE DATABASE
+
+ONE PRODUCT ENGINE
+
+ONE DYNAMIC PRODUCT PAGE
+
+UNLIMITED CATEGORIES
+
+UNLIMITED PRODUCTS
+
+NO PRODUCT-SPECIFIC HARDCODED PAGES.

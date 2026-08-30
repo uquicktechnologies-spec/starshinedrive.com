@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { getMountingVariantImage } from "@/components/product/MountingVariantsSection";
+import { PRODUCT_CONFIGS } from "@/data/products-config";
 import type { WebProductDetail } from "@workspace/api-client-react";
 
 function storageUrl(path: string) {
@@ -11,7 +13,23 @@ interface Props {
 }
 
 export function MountingVariantsSectionDynamic({ product, onContact }: Props) {
-  const variants = product.mountingVariants;
+  const configuredVariants = PRODUCT_CONFIGS[product.slug]?.mountingVariants ?? [];
+  const configuredNames = new Set(configuredVariants.map((variant) => variant.name));
+  const savedByName = new Map(product.mountingVariants.map((variant) => [variant.name, variant]));
+  const variants = [
+    ...configuredVariants.map((variant) => {
+      const saved = savedByName.get(variant.name);
+      return {
+        key: saved?.id ?? variant.name,
+        name: variant.name,
+        features: saved?.features.length ? saved.features : variant.features,
+        imageUrl: saved?.imageUrl,
+      };
+    }),
+    ...product.mountingVariants
+      .filter((variant) => !configuredNames.has(variant.name))
+      .map((variant) => ({ ...variant, key: variant.id })),
+  ];
   if (variants.length === 0) return null;
 
   return (
@@ -19,6 +37,7 @@ export function MountingVariantsSectionDynamic({ product, onContact }: Props) {
       {variants.map((variant, i) => {
         const isEven = i % 2 === 1; // even index → image left
         const isFirst = i === 0;
+        const localImage = getMountingVariantImage(product.slug, variant.name);
 
         const textBlock = (
           <div className="relative z-10 flex flex-col justify-center flex-1 md:max-w-md">
@@ -46,9 +65,9 @@ export function MountingVariantsSectionDynamic({ product, onContact }: Props) {
 
         const imageBlock = (
           <div className={`relative flex items-center justify-center shrink-0 min-h-[220px] md:min-h-[340px] w-full md:w-[420px] ${isFirst ? "bg-transparent" : "bg-white"}`}>
-            {variant.imageUrl ? (
+            {variant.imageUrl || localImage ? (
               <img
-                src={storageUrl(variant.imageUrl)}
+                src={variant.imageUrl ? storageUrl(variant.imageUrl) : localImage}
                 alt={variant.name}
                 className="w-full max-w-[300px] md:max-w-[420px] h-auto object-contain drop-shadow-xl"
                 loading="lazy"
@@ -69,7 +88,7 @@ export function MountingVariantsSectionDynamic({ product, onContact }: Props) {
         // diagonal white cut at the bottom as the hero section above it, so
         // the page transitions smoothly instead of jumping straight to white.
         return (
-          <div key={variant.id} className={isFirst ? "relative overflow-hidden bg-[#f0f0f0] pb-10 md:pb-14" : undefined}>
+          <div key={variant.key} className={isFirst ? "relative overflow-hidden bg-[#f0f0f0] pb-10 md:pb-14" : undefined}>
             {isFirst && (
               <div
                 className="absolute inset-x-0 bottom-0 h-10 md:h-14 bg-white"

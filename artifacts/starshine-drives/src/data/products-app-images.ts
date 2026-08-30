@@ -1,5 +1,15 @@
 /* Real application photos keyed by product slug */
 
+/* ── NMRV Series ──────────────────────────────────────────── */
+import imgNMRVBottling from "@assets/NMRV-Worm-Gear-Reducer-For-Bottling-Conveyor-Sections_1785702815562.webp";
+import imgNMRVLabeling from "@assets/NMRV-Worm-Gear-Reducer-For-Labeling-and-Capping-Machine-Modul_1785702815562.webp";
+import imgNMRVBelt from "@assets/NMRV-Worm-Gear-Reducer-For-Light-Belt-Conveyor-Systems_1785702815562.webp";
+import imgNMRVRoller from "@assets/NMRV-Worm-Gear-Reducer-For-Light-Roller-Conveyor-Modules_1785702815563.webp";
+import imgNMRVPacking from "@assets/NMRV-Worm-Gear-Reducer-For-Packaging-Transfer-Conveyors_1785702815563.webp";
+import imgNMRVRotary from "@assets/NMRV-Worm-Gear-Reducer-For-Small-Rotary-Accumulation-Tables_1785702815564.webp";
+import imgNMRVScrew from "@assets/NMRV-Worm-Gear-Reducer-For-Small-Screw-Feeders_1785702815564.webp";
+import imgNMRVWood from "@assets/NMRV-Worm-Gear-Reducer-For-Woodworking-Feed-Roller-Machines_1785702815564.webp";
+
 /* ── S Series ─────────────────────────────────────────────── */
 import imgSGlass    from "@assets/R-Series-Helical-Gear-Reducer-For-Glass-Sheet-Roller-Tables_1785672843048.webp";
 import imgBottling  from "@assets/S-Series-Helical-Worm-Gear-Reducer-For-Bottling-Conveyor-Sect_1785672843049.webp";
@@ -43,6 +53,16 @@ import imgRWood     from "@assets/R-Series-Helical-Gear-Reducer-For-Woodworking-
 export type AppSlide = { img: string; label: string };
 
 export const PRODUCT_APP_IMAGES: Record<string, AppSlide[]> = {
+  "nmrv-worm-gear-reducers": [
+    { img: imgNMRVBelt,     label: "Light Belt Conveyor Systems" },
+    { img: imgNMRVRoller,   label: "Light Roller Conveyor Modules" },
+    { img: imgNMRVPacking,  label: "Packaging Transfer Conveyors" },
+    { img: imgNMRVBottling, label: "Bottling Conveyor Sections" },
+    { img: imgNMRVLabeling, label: "Labeling & Capping Machines" },
+    { img: imgNMRVRotary,   label: "Small Rotary Accumulation Tables" },
+    { img: imgNMRVScrew,    label: "Small Screw Feeders" },
+    { img: imgNMRVWood,     label: "Woodworking Feed Roller Machines" },
+  ],
   "k-series-helical-bevel-gear-reducer": [
     { img: imgKRightAngle, label: "Right-Angle Conveyor Transfer Systems" },
     { img: imgKPacking,    label: "Packaging Conveyor Lines" },
@@ -72,6 +92,46 @@ export const PRODUCT_APP_IMAGES: Record<string, AppSlide[]> = {
     { img: imgRPacking, label: "Packaging Conveyor Modules" },
     { img: imgRRoller,  label: "Roller Conveyor Lines" },
     { img: imgRWood,    label: "Woodworking Panel Feed Line" },
+  ],
+  "rv-cast-iron-worm-gear-reducer": [
+    { img: imgFBelt,    label: "Heavy Conveyor Drives" },
+    { img: imgRMixer,   label: "Industrial Mixers" },
+    { img: imgKLift,    label: "Lifting Equipment" },
+    { img: imgFChain,   label: "Mining & Aggregate Conveyors" },
+    { img: imgRCeramic, label: "High-Temperature Process Lines" },
+    { img: imgRRoller,  label: "Heavy-Duty Roller Conveyors" },
+  ],
+  "compact-geared-motors": [
+    { img: imgNMRVPacking,  label: "Compact Packaging Machines" },
+    { img: imgNMRVBottling, label: "Food & Beverage Lines" },
+    { img: imgNMRVLabeling, label: "Labeling & Capping Machines" },
+    { img: imgNMRVRoller,   label: "Light Roller Conveyors" },
+    { img: imgNMRVRotary,   label: "Rotary Accumulation Tables" },
+    { img: imgNMRVWood,     label: "Woodworking Feed Machines" },
+  ],
+  "sck-helical-hypoid-gear-unit": [
+    { img: imgKRightAngle, label: "Right-Angle Conveyor Transfers" },
+    { img: imgKPacking,    label: "Packaging Conveyor Lines" },
+    { img: imgKBottling,   label: "Bottling & Filling Lines" },
+    { img: imgKPallet,     label: "Pallet Roller Conveyors" },
+    { img: imgKGlass,      label: "Glass Sheet Transfer Lines" },
+    { img: imgKWood,       label: "Woodworking Panel Feed Lines" },
+  ],
+  "sp-precision-planetary-gearbox": [
+    { img: imgNMRVLabeling, label: "Precision Labeling Machines" },
+    { img: imgNMRVRotary,   label: "Indexing & Rotary Tables" },
+    { img: imgKRightAngle,  label: "Automated Transfer Systems" },
+    { img: imgRPacking,     label: "Packaging Machine Automation" },
+    { img: imgRGlass,       label: "Precision Glass Handling" },
+    { img: imgNMRVBottling, label: "High-Speed Filling Lines" },
+  ],
+  "cycloidal-gear-reducer": [
+    { img: imgKLift,     label: "Heavy Lifting Equipment" },
+    { img: imgFChain,    label: "Heavy Chain Conveyors" },
+    { img: imgRMixer,    label: "Industrial Mixing Equipment" },
+    { img: imgKRightAngle, label: "Material Transfer Systems" },
+    { img: imgRRoller,   label: "Heavy Roller Conveyors" },
+    { img: imgFCeramic,  label: "High-Load Process Lines" },
   ],
   "s-series-helical-worm-gear-reducer": [
     { img: imgSRoller,   label: "Light Roller Conveyor Modules" },

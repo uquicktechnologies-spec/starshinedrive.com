@@ -1,0 +1,376 @@
+STOCK MANAGEMENT MODULE
+
+Create a complete Stock Management System with Inventory, Purchase, Sales, Stock Tracking, and Reports.
+
+==================================================
+1. DASHBOARD
+==================================================
+
+Show Cards
+
+• Total Products
+• Total Categories
+• Total Purchase
+• Total Sales
+• Current Stock
+• Low Stock Products
+• Out of Stock Products
+• Stock Value
+• Today's Purchase
+• Today's Sales
+
+Recent Activities
+- Latest Purchases
+- Latest Sales
+- Low Stock Alerts
+
+==================================================
+2. PRODUCT CATEGORY
+==================================================
+
+Fields
+
+• Category Name
+• Description
+• Status (Active/Inactive)
+
+Functions
+
+• Add
+• Edit
+• Delete
+• Search
+• Export
+
+==================================================
+3. PRODUCT SUB GROUP
+==================================================
+
+Fields
+
+• Category
+• Sub Group Name
+• Description
+• Status
+
+Functions
+
+• Add
+• Edit
+• Delete
+• Search
+
+==================================================
+4. NEW PRODUCT
+==================================================
+
+Fields
+
+• Product Name
+• Product Code (Auto Generate)
+• Barcode
+• QR Code
+• Category
+• Sub Group
+• Brand
+• Model
+• Unit
+• HSN Code
+• GST %
+• Purchase Price
+• Sale Price
+• Minimum Stock
+• Maximum Stock
+• Opening Stock
+• Product Image
+• Description
+• Status
+
+Functions
+
+• Add Product
+• Edit Product
+• Delete Product
+• Duplicate Product
+• Print Barcode
+• Print QR Code
+
+==================================================
+5. PRODUCT PURCHASE
+==================================================
+
+Purchase Entry
+
+Fields
+
+• Purchase No (Auto)
+• Purchase Date
+• Supplier
+• Invoice Number
+• Product
+• Quantity
+• Purchase Price
+• GST
+• Discount
+• Total Amount
+• Payment Mode
+• Notes
+
+Functions
+
+• Save Purchase
+• Edit Purchase
+• Delete Purchase
+• Print Invoice
+
+After Purchase
+
+Automatically increase stock.
+
+==================================================
+6. PRODUCT SALES
+==================================================
+
+Sales Entry
+
+Fields
+
+• Invoice No
+• Invoice Date
+• Customer
+• Product
+• Quantity
+• Sale Price
+• GST
+• Discount
+• Total
+
+Functions
+
+• Save Sale
+• Edit Sale
+• Delete Sale
+• Print Invoice
+
+After Sale
+
+Automatically decrease stock.
+
+Prevent sales if stock is unavailable.
+
+==================================================
+7. STOCK MANAGEMENT
+==================================================
+
+Display
+
+Product
+Current Stock
+Purchase Qty
+Sales Qty
+Available Qty
+Reserved Qty
+Minimum Stock
+Maximum Stock
+Stock Status
+
+Status
+
+Green = Available
+
+Orange = Low Stock
+
+Red = Out of Stock
+
+Functions
+
+• Stock Adjustment
+• Stock Transfer
+• Manual Increase
+• Manual Decrease
+• Stock History
+
+==================================================
+8. STOCK PENDING
+==================================================
+
+Display
+
+• Low Stock Products
+• Out of Stock Products
+• Pending Purchase
+• Pending Delivery
+
+Show
+
+Product
+Required Qty
+Current Qty
+Suggested Purchase Qty
+
+==================================================
+9. SUPPLIER MANAGEMENT
+==================================================
+
+Supplier Name
+
+Company
+
+GST Number
+
+Phone
+
+Email
+
+Address
+
+Outstanding Balance
+
+==================================================
+10. CUSTOMER MANAGEMENT
+==================================================
+
+Customer Name
+
+Phone
+
+Email
+
+GST Number
+
+Address
+
+Purchase History
+
+==================================================
+11. REPORTS
+==================================================
+
+Generate Reports
+
+• Product Report
+• Purchase Report
+• Sales Report
+• Current Stock Report
+• Stock Movement Report
+• Low Stock Report
+• Out of Stock Report
+• Supplier Report
+• Customer Report
+• Profit & Loss Report
+• Daily Report
+• Weekly Report
+• Monthly Report
+• Yearly Report
+
+Export
+
+• PDF
+• Excel
+• CSV
+
+Print Support
+
+==================================================
+12. SEARCH
+==================================================
+
+Search By
+
+• Product Name
+• Product Code
+• Barcode
+• Category
+• Sub Group
+• Supplier
+• Customer
+• Invoice Number
+
+==================================================
+13. NOTIFICATIONS
+==================================================
+
+Show Notifications
+
+• Low Stock Alert
+• Out of Stock Alert
+• New Purchase
+• New Sale
+• Product Expiry (Future)
+• Stock Adjustment
+
+==================================================
+14. SECURITY
+==================================================
+
+Admin
+
+Can access everything.
+
+Manager
+
+Can Purchase, Sales and Reports.
+
+Staff
+
+Can only Sales and View Stock.
+
+==================================================
+15. DATABASE
+==================================================
+
+Create Tables
+
+• Categories
+• SubGroups
+• Products
+• Suppliers
+• Customers
+• Purchases
+• PurchaseItems
+• Sales
+• SaleItems
+• StockHistory
+• StockAdjustments
+• Users
+
+==================================================
+16. AUTOMATIC CALCULATIONS
+==================================================
+
+Current Stock
+
+= Opening Stock
++ Purchase Quantity
+- Sales Quantity
++ Manual Increase
+- Manual Decrease
+
+Stock Value
+
+Current Stock × Purchase Price
+
+Expected Profit
+
+(Current Stock × Sale Price)
+-
+(Current Stock × Purchase Price)
+
+==================================================
+17. FUTURE FEATURES
+==================================================
+
+• Barcode Scanner Support
+• QR Code Scanner
+• Multi Warehouse
+• Batch Number
+• Serial Number Tracking
+• Expiry Date Tracking
+• Manufacturing Date
+• Product Variants
+• Multi Company
+• Multi Branch
+• Mobile App Integration
+• API Integration
+• Audit Log
+• Backup & Restore

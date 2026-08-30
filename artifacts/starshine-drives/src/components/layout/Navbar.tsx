@@ -31,6 +31,7 @@ type NavLink = {
 const STATIC_NAV_LINKS: NavLink[] = [
   { name: "Home", href: "/" },
   { name: "Product", href: "/products" },
+  { name: "Drive Configurator", href: "/configurator" },
   {
     name: "Solution",
     href: "/solutions",

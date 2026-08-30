@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ContactModal } from "@/components/ui/contact-modal";
 import { TechnicalDatasheetDynamic } from "@/components/product/TechnicalDatasheetDynamic";
 import { MountingVariantsSectionDynamic } from "@/components/product/MountingVariantsSectionDynamic";
+import { PRODUCT_APP_IMAGES } from "@/data/products-app-images";
+import { PRODUCT_HERO_IMAGES } from "@/data/product-hero-images";
+import { getProductDocumentUrl } from "@/data/products";
 import {
   CheckSquare, FileText, ChevronRight, ChevronLeft, Factory, Package, UtensilsCrossed, Scissors,
   HeartPulse, FlaskConical, DoorOpen, ShoppingCart, Mountain, Printer, TreePine, Building2, Wheat,
@@ -116,19 +119,35 @@ export default function ProductDetailDynamic() {
   // (before the loading/error early returns) to satisfy the Rules of Hooks.
   useEffect(() => {
     if (!product) return;
-    product.applications.forEach((a, i) => {
+    const registeredSlides = PRODUCT_APP_IMAGES[product.slug];
+    if (registeredSlides) {
+      registeredSlides.forEach((slide) => {
+        const preloadImg = new Image();
+        preloadImg.src = slide.img;
+      });
+      return;
+    }
+    product.applications.forEach((application, i) => {
       const preloadImg = new Image();
-      preloadImg.src = a.imageUrl ? storageUrl(a.imageUrl) : FALLBACK_IMGS[i % FALLBACK_IMGS.length];
+      preloadImg.src = application.imageUrl
+        ? storageUrl(application.imageUrl)
+        : FALLBACK_IMGS[i % FALLBACK_IMGS.length];
     });
   }, [product]);
 
   if (isLoading) return <div className="min-h-screen flex flex-col bg-white"><Navbar /><div className="flex-1" /><Footer /></div>;
   if (isError || !product) return <NotFound />;
 
-  const hasRealImages = product.applications.some((a) => a.imageUrl);
-  const appSlides = product.applications.map((a, i) => ({
-    label: a.label,
-    img: a.imageUrl ? storageUrl(a.imageUrl) : FALLBACK_IMGS[i % FALLBACK_IMGS.length],
+  const documentUrl = product.docUrl ?? getProductDocumentUrl(product.slug);
+  const registeredSlides = PRODUCT_APP_IMAGES[product.slug];
+  const heroImage = PRODUCT_HERO_IMAGES[product.slug]
+    ?? (product.mainImageUrl ? storageUrl(product.mainImageUrl) : null);
+  const hasRealImages = !!registeredSlides || product.applications.some((application) => application.imageUrl);
+  const appSlides = registeredSlides ?? product.applications.map((application, i) => ({
+    label: application.label,
+    img: application.imageUrl
+      ? storageUrl(application.imageUrl)
+      : FALLBACK_IMGS[i % FALLBACK_IMGS.length],
   }));
   const total = appSlides.length;
   const p2 = total ? (activeSlide - 2 + total) % total : 0;
@@ -187,9 +206,9 @@ export default function ProductDetailDynamic() {
                 </div>
               )}
 
-              {product.docUrl ? (
+              {documentUrl ? (
                 <a
-                  href={product.docUrl}
+                  href={documentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm text-primary hover:text-accent transition-colors mb-7 font-medium"
@@ -219,9 +238,9 @@ export default function ProductDetailDynamic() {
             </div>
 
             <div className="relative z-10 flex items-center justify-center py-6 md:py-0">
-              {product.mainImageUrl && (
+              {heroImage && (
                 <img
-                  src={storageUrl(product.mainImageUrl)}
+                  src={heroImage}
                   alt={product.name}
                   className="w-full max-w-[360px] md:max-w-[580px] h-auto object-contain drop-shadow-2xl"
                   loading="eager"

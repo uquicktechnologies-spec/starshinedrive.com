@@ -33,7 +33,7 @@ import {
   Layers,
   Wind,
 } from "lucide-react";
-import { getProductBySlug, getRelatedProducts } from "@/data/products";
+import { getProductBySlug, getProductDocumentUrl, getRelatedProducts } from "@/data/products";
 import { PRODUCT_APP_IMAGES } from "@/data/products-app-images";
 import NotFound from "@/pages/not-found";
 
@@ -132,6 +132,7 @@ export default function ProductDetail() {
 
   if (!product) return <NotFound />;
 
+  const documentUrl = product.docUrl ?? getProductDocumentUrl(product.slug);
   const related = getRelatedProducts(product.relatedSlugs);
   const relatedCardCopy = product.slug === "s-series-helical-worm-gear-reducer"
     ? {
@@ -218,9 +219,9 @@ export default function ProductDetail() {
               </div>
 
               {/* Download link */}
-              {product.docUrl ? (
+              {documentUrl ? (
                 <a
-                  href={product.docUrl}
+                  href={documentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm text-primary hover:text-accent transition-colors mb-7 font-medium"

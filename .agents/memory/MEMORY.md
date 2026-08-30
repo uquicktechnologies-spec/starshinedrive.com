@@ -1,4 +1,4 @@
-- [Starshine Drive brand tokens](starshine-brand.md) — primary #093C71 (navy), accent #EF6F24 (orange), font IBM Plex Sans; tokens live in starshine-drives/src/index.css (mobile app removed Aug 2026)
+- [Starshine Drive brand tokens](starshine-brand.md) — primary #093C71 (navy), accent #EF6F24 (orange), font IBM Plex Sans; keep web and mobile visually synchronized.
 - [CRM auth & DB migrations](crm-auth-and-migrations.md) — CRM_STAFF_EMAILS allow-list fails closed; Clerk session claims lack email here; embedded SignIn needs hash routing; migrations applied at API startup.
 - [Workspace lib packages w/ own deps](workspace-lib-packages.md) — new `lib/*` packages need `pnpm install` + `tsc --build` (composite:true) before consuming apps typecheck/HMR cleanly.
 - [Express Request augmentation issue](express-request-augmentation.md) — global Express Request augmentation doesn't resolve here; use a local `Request & {...}` intersection type + cast instead.
@@ -12,3 +12,6 @@
 - [CRM concurrency & caching decisions](crm-concurrency-and-caching.md) — doc-number generation must share a tx+lock with its insert; React Query defaults set staleTime 30s, no refetch-on-focus.
 - [CRM double-submit form risk](crm-double-submit-forms.md) — POST-create forms need submit disabled on mutation.isPending or double-click makes duplicate rows; replace-endpoint saves are lower risk.
 - [CRM generated-client type drift](crm-generated-client-type-drift.md) — many CRM pages fail tsc pre-existing (not a regression); generated response types don't match page code's expected shape; runtime unaffected.
+- [Clerk to Postgres-session auth migration](clerk-to-session-auth-migration.md) — CRM auth now bcrypt+express-session backed by Postgres; connect-pg-simple's auto-create-table needs a manual CREATE TABLE under esbuild bundling.
+- [CRM self-service sign-up policy](crm-signup-policy.md) — sign-up is intentionally open (user's choice); new accounts always default to lowest-privilege role and never overwrite an active account.
+- [Vite port conflict after env reload](workflow-port-conflict-after-reload.md) — "Port already in use" right after "Environment updated. Reloading shell..." means an orphaned vite process; lsof+kill it before WorkflowsRestart.

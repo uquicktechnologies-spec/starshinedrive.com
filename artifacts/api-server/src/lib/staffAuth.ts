@@ -1,4 +1,4 @@
-import { clerkClient, getAuth } from "@clerk/express";
+import bcrypt from "bcryptjs";
 import { count, eq } from "drizzle-orm";
 import type { Request, Response, NextFunction } from "express";
 import { db, staffRolesTable } from "@workspace/db";
@@ -10,29 +10,10 @@ export type StaffRoleName = StaffRole;
 /** Fields stashed onto `req` by requireStaff/requireRole. Cast with `req as StaffRequest`. */
 export type StaffRequest = Request & { staffEmail?: string; staffRole?: StaffRoleName };
 
-export function staffEmailAllowList(): Set<string> {
-  return new Set(
-    (process.env.CRM_STAFF_EMAILS ?? "")
-      .split(",")
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  );
-}
+const BCRYPT_ROUNDS = 10;
 
-const userEmailCache = new Map<string, string>();
-
-export async function resolveUserEmail(userId: string, claimEmail: unknown): Promise<string> {
-  if (typeof claimEmail === "string" && claimEmail) return claimEmail.toLowerCase();
-  const cached = userEmailCache.get(userId);
-  if (cached !== undefined) return cached;
-  const user = await clerkClient.users.getUser(userId);
-  const email = (
-    user.primaryEmailAddress?.emailAddress ??
-    user.emailAddresses[0]?.emailAddress ??
-    ""
-  ).toLowerCase();
-  userEmailCache.set(userId, email);
-  return email;
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS);
 }
 
 /**
@@ -52,46 +33,107 @@ export async function getStaffRole(email: string): Promise<StaffRoleName> {
 }
 
 /**
- * A hidden master-admin account, identified by Clerk username (not email) and
- * configured only via the MASTER_ADMIN_USERNAME/MASTER_ADMIN_PASSWORD secrets.
- * It always resolves to "admin" and never touches staff_roles, so it never
- * appears in the Staff Roles CRM page and can't be edited/removed from there.
+ * Verifies an email/password pair against the staff_roles table. Returns the
+ * lowercased email on success, or null on any failure (unknown email, no
+ * password set yet, or wrong password) -- callers should treat all of these
+ * identically (generic "invalid credentials") to avoid leaking which emails
+ * exist.
  */
+export async function verifyStaffCredentials(email: string, password: string): Promise<string | null> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail || !password) return null;
+  const [row] = await db.select().from(staffRolesTable).where(eq(staffRolesTable.email, normalizedEmail)).limit(1);
+  if (!row?.passwordHash) return null;
+  const valid = await bcrypt.compare(password, row.passwordHash);
+  return valid ? normalizedEmail : null;
+}
+
+const SIGNUP_PASSWORD_MIN_LENGTH = 8;
+
+export type CreateStaffAccountResult =
+  | { ok: true; email: string }
+  | { ok: false; error: string; status: 400 | 409 };
+
+/**
+ * Self-service account creation (sign up). Anyone can create a CRM login
+ * this way -- by design, per product decision -- so every new account is
+ * granted the least-privileged "staff" role; an admin promotes it later
+ * from the Staff Roles page if warranted. Never grant "admin"/"manager"
+ * here.
+ *
+ * If an admin already pre-added this email via the Staff Roles page (a row
+ * exists but has no password yet), signing up claims that row and keeps its
+ * assigned role instead of creating a duplicate. An email that already has
+ * a password set is rejected -- sign up never overwrites an active
+ * account's credentials.
+ */
+export async function createStaffAccount(
+  email: string,
+  password: string,
+  name?: string,
+): Promise<CreateStaffAccountResult> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) return { ok: false, error: "Email is required", status: 400 };
+  if (password.length < SIGNUP_PASSWORD_MIN_LENGTH) {
+    return { ok: false, error: `Password must be at least ${SIGNUP_PASSWORD_MIN_LENGTH} characters`, status: 400 };
+  }
+
+  const [existing] = await db.select().from(staffRolesTable).where(eq(staffRolesTable.email, normalizedEmail)).limit(1);
+  if (existing?.passwordHash) {
+    return { ok: false, error: "An account with this email already exists. Please sign in instead.", status: 409 };
+  }
+
+  const passwordHash = await hashPassword(password);
+  const trimmedName = name?.trim() || undefined;
+  if (existing) {
+    await db.update(staffRolesTable)
+      .set({ passwordHash, ...(trimmedName ? { name: trimmedName } : {}) })
+      .where(eq(staffRolesTable.id, existing.id));
+  } else {
+    await db.insert(staffRolesTable).values({
+      email: normalizedEmail,
+      name: trimmedName ?? null,
+      role: "staff",
+      passwordHash,
+    });
+  }
+  return { ok: true, email: normalizedEmail };
+}
+
+/**
+ * A hidden master-admin backup login, checked directly against the
+ * MASTER_ADMIN_USERNAME/MASTER_ADMIN_PASSWORD secrets (no DB row involved).
+ * It always resolves to "admin" and never appears in the Staff Roles CRM
+ * page. Useful if the staff_roles table is ever locked out (e.g. every admin
+ * row's password is lost).
+ */
+export function verifyMasterAdmin(username: string, password: string): boolean {
+  const expectedUsername = (process.env.MASTER_ADMIN_USERNAME ?? "").trim();
+  const expectedPassword = process.env.MASTER_ADMIN_PASSWORD ?? "";
+  if (!expectedUsername || !expectedPassword) return false;
+  return username.trim() === expectedUsername && password === expectedPassword;
+}
+
+declare module "express-session" {
+  interface SessionData {
+    staffEmail?: string;
+    isMasterAdmin?: boolean;
+  }
+}
+
 export async function requireStaff(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const auth = getAuth(req);
-  if (!auth.userId) {
+  const session = req.session;
+  if (session?.isMasterAdmin) {
+    (req as StaffRequest).staffEmail = session.staffEmail ?? "master-admin@local";
+    (req as StaffRequest).staffRole = "admin";
+    next();
+    return;
+  }
+  if (!session?.staffEmail) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
-
-  const masterAdminUsername = (process.env.MASTER_ADMIN_USERNAME ?? "").trim().toLowerCase();
-  const claimEmail = auth.sessionClaims?.email;
-  let email = typeof claimEmail === "string" && claimEmail ? claimEmail.toLowerCase() : (userEmailCache.get(auth.userId) ?? "");
-
-  if (!email || masterAdminUsername) {
-    try {
-      const user = await clerkClient.users.getUser(auth.userId);
-      if (!email) {
-        email = (user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? "").toLowerCase();
-        userEmailCache.set(auth.userId, email);
-      }
-      if (masterAdminUsername && user.username && user.username.trim().toLowerCase() === masterAdminUsername) {
-        (req as StaffRequest).staffEmail = email || `${masterAdminUsername}@master.local`;
-        (req as StaffRequest).staffRole = "admin";
-        next();
-        return;
-      }
-    } catch {
-      res.status(403).json({ error: "CRM access is restricted to approved staff" });
-      return;
-    }
-  }
-
-  if (!email || !staffEmailAllowList().has(email)) {
-    res.status(403).json({ error: "CRM access is restricted to approved staff" });
-    return;
-  }
-  (req as StaffRequest).staffEmail = email;
+  (req as StaffRequest).staffEmail = session.staffEmail;
   next();
 }
 
@@ -141,28 +183,4 @@ export function requirePermission(module: CrmModule, action: PermissionAction) {
     }
     next();
   };
-}
-
-/**
- * Ensures the hidden master-admin Clerk account exists with the current
- * MASTER_ADMIN_PASSWORD secret. Safe to call on every server start: creates
- * the account on first run, and keeps its password in sync with the secret
- * afterward (the secret is the single source of truth for this account).
- */
-export async function ensureMasterAdminAccount(): Promise<void> {
-  const username = (process.env.MASTER_ADMIN_USERNAME ?? "").trim();
-  const password = process.env.MASTER_ADMIN_PASSWORD;
-  if (!username || !password) return;
-  try {
-    const existing = await clerkClient.users.getUserList({ username: [username] });
-    const user = existing.data[0];
-    if (user) {
-      await clerkClient.users.updateUser(user.id, { password, skipPasswordChecks: true });
-    } else {
-      await clerkClient.users.createUser({ username, password, skipPasswordChecks: true });
-    }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error("Failed to provision master admin account:", err instanceof Error ? err.message : err);
-  }
 }

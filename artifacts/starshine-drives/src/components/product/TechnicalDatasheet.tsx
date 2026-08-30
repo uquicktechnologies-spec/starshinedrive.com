@@ -16,6 +16,20 @@ import imgRShaftInput       from "@assets/R-series-with-Shaft-Input_178567800251
 import imgRFlangeInput      from "@assets/R-series-with-Flange-Input_1785678018884.webp";
 import imgRightAngleWorm    from "@assets/Right-Angle_Worm_Drive_1785682690098.webp";
 import imgDoubleStageOption from "@assets/Double-Stage-Option_1785682690097.webp";
+import imgNMRVDirectMotor   from "@assets/nmrv-worm-gear-reducers_1785682736651.webp";
+import imgNMRVShaftInput    from "@assets/NRV-Shaft-Input-Worm-Reducer_1785682928590.webp";
+import imgNMRVFlangeInput   from "@assets/NRV-Special-Input-Configuration_1785682778082.webp";
+import imgNMRVSpecialInput  from "@assets/NMRV-Special-Input-Configuration_1785682785736.webp";
+import imgNMRVDoubleStage   from "@assets/Double-Stage-NMRV-Reducer_1785682757708.webp";
+import imgFSeries           from "@assets/f-series-parallel-shaft-helical-gear-reducer_1785680408884.webp";
+import imgFSeriesFlange     from "@assets/FAF-Hollow-Shaft-Flange-Reducer_1785681156163.webp";
+import imgKSeries           from "@assets/k-series-helical-bevel-gear-reducer_1785681786890.webp";
+import imgKSeriesFlange     from "@assets/kf-series-helical-bevel-gear-reducer_1785681780861.png";
+import imgSSeries           from "@assets/s-series-helical-worm-gear-reducer_1785737608015.webp";
+import imgCompactMotor      from "@assets/starshine-compact-geared-motor.webp";
+import imgSCKHypoid         from "@assets/starshine-sck-helical-hypoid-gear-unit_1785673517738.webp";
+import imgSPPlanetary       from "@assets/starshine-sp-precision-planetary-gearbox.webp";
+import imgCycloidal         from "@assets/generated_images/prod-cycloidal.webp";
 
 const CONFIG_IMAGES: Record<string, string> = {
   "Direct Motor Input":    imgDirectMotor,
@@ -34,12 +48,70 @@ const CONFIG_IMAGES: Record<string, string> = {
 
 /* Per-product image overrides keyed by slug → inputType label */
 const PRODUCT_CONFIG_IMAGE_OVERRIDES: Record<string, Record<string, string>> = {
+  "nmrv-worm-gear-reducers": {
+    "Direct Motor Input":   imgNMRVDirectMotor,
+    "Shaft Input":          imgNMRVShaftInput,
+    "Flange Input":         imgNMRVFlangeInput,
+    "IEC Motor Adapter":    imgNMRVDirectMotor,
+    "Right-Angle Worm Drive": imgNMRVSpecialInput,
+    "Double-Stage Option":  imgNMRVDoubleStage,
+  },
   "r-series-helical-gear-reducer": {
     "Direct Motor Input": imgRDirectMotor,
     "Shaft Input":        imgRShaftInput,
     "Flange Input":       imgRFlangeInput,
   },
+  "f-series-parallel-shaft-helical-gear-reducer": {
+    "Direct Motor Input": imgFSeries,
+    "Shaft Input":        imgFSeries,
+    "Flange Input":       imgFSeriesFlange,
+    "IEC Motor Adapter":  imgFSeries,
+    "Brake Motor":        imgFSeries,
+    "VFD Motor Option":   imgFSeries,
+  },
+  "k-series-helical-bevel-gear-reducer": {
+    "Direct Motor Input": imgKSeries,
+    "Shaft Input":        imgKSeries,
+    "Flange Input":       imgKSeriesFlange,
+    "IEC Motor Adapter":  imgKSeries,
+    "Brake Motor":        imgKSeries,
+    "VFD Motor Option":   imgKSeries,
+  },
+  "s-series-helical-worm-gear-reducer": {
+    "Direct Motor Input": imgSSeries,
+    "Shaft Input":        imgSSeries,
+    "Flange Input":       imgSSeries,
+    "IEC Motor Adapter":  imgSSeries,
+    "Brake Motor":        imgSSeries,
+    "VFD Motor Option":   imgSSeries,
+  },
+  "rv-cast-iron-worm-gear-reducer": {
+    "Direct Motor Input": imgNMRVDirectMotor,
+    "Shaft Input":        imgNMRVShaftInput,
+  },
+  "compact-geared-motors": {
+    "Direct Drive":         imgCompactMotor,
+    "Inline Configuration": imgCompactMotor,
+  },
+  "sck-helical-hypoid-gear-unit": {
+    "Direct Motor Input": imgSCKHypoid,
+    "Shaft Input":        imgSCKHypoid,
+    "Flange Input":       imgSCKHypoid,
+  },
+  "sp-precision-planetary-gearbox": {
+    "Servo Motor Flange":   imgSPPlanetary,
+    "Stepper Motor Flange": imgSPPlanetary,
+    "Shaft Input":          imgSPPlanetary,
+  },
+  "cycloidal-gear-reducer": {
+    "Direct Motor Input": imgCycloidal,
+    "Shaft Input":        imgCycloidal,
+  },
 };
+
+export function getProductConfigImage(productSlug: string, inputType: string) {
+  return PRODUCT_CONFIG_IMAGE_OVERRIDES[productSlug]?.[inputType] ?? CONFIG_IMAGES[inputType];
+}
 
 interface TechnicalDatasheetProps {
   product: Product;
@@ -114,8 +186,7 @@ export function TechnicalDatasheet({ product, onDownload }: TechnicalDatasheetPr
             {/* Mobile: 2-column grid; Desktop: single row */}
             <div className="grid grid-cols-2 md:hidden gap-4 mb-6 px-2">
               {config.inputTypes.map((type) => {
-                const overrides = PRODUCT_CONFIG_IMAGE_OVERRIDES[product.slug] ?? {};
-                const imgSrc = overrides[type] ?? CONFIG_IMAGES[type];
+                const imgSrc = getProductConfigImage(product.slug, type);
                 return (
                   <div key={type} className="flex flex-col items-center gap-2 text-center">
                     {imgSrc ? (
@@ -133,8 +204,7 @@ export function TechnicalDatasheet({ product, onDownload }: TechnicalDatasheetPr
             {/* Desktop: single scrollable row */}
             <div className="hidden md:flex gap-4 mb-6 justify-center">
               {config.inputTypes.map((type) => {
-                const overrides = PRODUCT_CONFIG_IMAGE_OVERRIDES[product.slug] ?? {};
-                const imgSrc = overrides[type] ?? CONFIG_IMAGES[type];
+                const imgSrc = getProductConfigImage(product.slug, type);
                 return (
                   <div key={type} className="flex flex-col items-center gap-2 text-center w-[160px]">
                     {imgSrc ? (

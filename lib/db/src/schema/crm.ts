@@ -288,6 +288,10 @@ export const staffRolesTable = pgTable("staff_roles", {
   email: text("email").notNull().unique(),
   name: text("name"),
   role: text("role").notNull().default("staff"), // admin | manager | staff
+  // Bcrypt hash of the staff member's login password. Null until an admin
+  // sets one (from the Staff Roles CRM page) -- a staff row with no password
+  // set cannot sign in yet.
+  passwordHash: text("password_hash"),
   salesExecutiveId: integer("sales_executive_id").references(() => salesExecutivesTable.id, { onDelete: "set null" }),
   ...auditColumns,
 }, (table) => [

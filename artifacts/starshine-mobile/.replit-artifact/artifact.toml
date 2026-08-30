@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/mobile/"
+title = "Starshine Drive Mobile"
+description = "A mobile companion app for Starshine Drive that lets buyers browse industrial gear products, explore application solutions across 12 industries, and request tailored quotations."
+version = "1.0.0"
+id = "artifacts/starshine-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/mobile/" ]
+localPort = 24297
+
+[services.development]
+run = "pnpm --filter @workspace/starshine-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/starshine-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/starshine-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "24297"
+BASE_PATH = "/mobile/"

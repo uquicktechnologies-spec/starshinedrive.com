@@ -18,8 +18,7 @@ import {
   productsTable, productStockTable, stockHistoryTable, purchasesTable, salesTable,
   stockAdjustmentsTable, customersTable, type PurchaseSaleItem,
 } from "@workspace/db";
-import { clerkClient } from "@clerk/express";
-import { requireStaff, requirePermission, getStaffRole, type StaffRequest } from "../lib/staffAuth";
+import { requireStaff, requirePermission, getStaffRole, hashPassword, type StaffRequest } from "../lib/staffAuth";
 import { getPermissionsForRole, hasPermission } from "@workspace/permissions";
 import { adjustStock, getStockQty, InsufficientStockError } from "../lib/stockAdjust";
 import { optionalText, getOrCreateSettings, fetchLogoBuffer } from "./crm";
@@ -206,51 +205,23 @@ router.get("/crm/staff-roles", requirePermission("staffRoles", "view"), async (_
   res.json(rows);
 });
 
-// Creates the staff member's Clerk login directly with the given password (admin-set,
-// usable immediately), or resets the password on an existing Clerk account with that email.
-async function setStaffLoginPassword(email: string, password: string): Promise<void> {
-  const normalizedEmail = email.toLowerCase();
-  const existing = await clerkClient.users.getUserList({ emailAddress: [normalizedEmail] });
-  const user = existing.data[0];
-  // skipPasswordChecks bypasses Clerk's strength/breached-password validation. This is an
-  // admin-set password for internal staff (not self-service sign-up), so we trust the admin's
-  // choice rather than rejecting reasonable passwords that merely fail Clerk's policy/pwned check.
-  if (user) {
-    await clerkClient.users.updateUser(user.id, { password, skipPasswordChecks: true });
-  } else {
-    await clerkClient.users.createUser({ emailAddress: [normalizedEmail], password, skipPasswordChecks: true });
-  }
-}
-
-/** Extracts Clerk's per-field validation messages (e.g. "password is too common") when available. */
-function clerkErrorMessage(err: unknown): string {
-  const clerkErrors = (err as { errors?: Array<{ message?: string; longMessage?: string }> } | undefined)?.errors;
-  if (Array.isArray(clerkErrors) && clerkErrors.length > 0) {
-    return clerkErrors.map((e) => e.longMessage ?? e.message).filter(Boolean).join("; ");
-  }
-  return err instanceof Error ? err.message : String(err);
-}
-
 router.post("/crm/staff-roles", requirePermission("staffRoles", "create"), async (req, res): Promise<void> => {
   const parsed = CreateStaffRoleBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   const data = parsed.data;
-  if (data.password) {
-    try {
-      await setStaffLoginPassword(data.email, data.password);
-    } catch (err) {
-      res.status(400).json({ error: `Could not set login password: ${clerkErrorMessage(err)}` });
-      return;
-    }
-  }
+  const passwordHash = data.password ? await hashPassword(data.password) : undefined;
   const [row] = await db.insert(staffRolesTable).values({
     email: data.email.toLowerCase(),
     name: optionalText(data.name),
     role: data.role,
     salesExecutiveId: data.salesExecutiveId ?? null,
+    ...(passwordHash ? { passwordHash } : {}),
   }).onConflictDoUpdate({
     target: staffRolesTable.email,
-    set: { name: optionalText(data.name), role: data.role, salesExecutiveId: data.salesExecutiveId ?? null },
+    set: {
+      name: optionalText(data.name), role: data.role, salesExecutiveId: data.salesExecutiveId ?? null,
+      ...(passwordHash ? { passwordHash } : {}),
+    },
   }).returning();
   res.status(201).json(row);
 });
@@ -262,19 +233,11 @@ router.patch("/crm/staff-roles/:id", requirePermission("staffRoles", "edit"), as
     res.status(400).json({ error: !params.success ? params.error.message : parsed.error?.message }); return;
   }
   const { password, ...rest } = parsed.data;
-  if (password) {
-    const [existingRow] = await db.select().from(staffRolesTable).where(eq(staffRolesTable.id, params.data.id));
-    if (!existingRow) { res.status(404).json({ error: "Staff role not found" }); return; }
-    try {
-      await setStaffLoginPassword(existingRow.email, password);
-    } catch (err) {
-      res.status(400).json({ error: `Could not reset login password: ${clerkErrorMessage(err)}` });
-      return;
-    }
-  }
+  const passwordHash = password ? await hashPassword(password) : undefined;
   const [row] = await db.update(staffRolesTable).set({
     ...rest,
     name: optionalText(rest.name),
+    ...(passwordHash ? { passwordHash } : {}),
   }).where(eq(staffRolesTable.id, params.data.id)).returning();
   if (!row) { res.status(404).json({ error: "Staff role not found" }); return; }
   res.json(row);

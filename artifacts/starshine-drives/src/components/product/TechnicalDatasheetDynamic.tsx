@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WebProductDetail } from "@workspace/api-client-react";
+import { getProductConfigImage } from "@/components/product/TechnicalDatasheet";
 
 function storageUrl(path: string) {
   return `/api/storage${path}`;
@@ -82,32 +83,42 @@ export function TechnicalDatasheetDynamic({ product }: Props) {
         {activeTab === "Configuration" && (
           <div>
             <div className="grid grid-cols-2 md:hidden gap-4 mb-6 px-2">
-              {product.configInputTypes.map((type) => (
+              {product.configInputTypes.map((type) => {
+                const imgSrc = type.imageUrl
+                  ? storageUrl(type.imageUrl)
+                  : getProductConfigImage(product.slug, type.label);
+                return (
                 <div key={type.id} className="flex flex-col items-center gap-2 text-center">
-                  {type.imageUrl ? (
+                  {imgSrc ? (
                     <div className="flex items-center justify-center w-full h-[100px]">
-                      <img src={storageUrl(type.imageUrl)} alt={type.label} className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
+                      <img src={imgSrc} alt={type.label} className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
                     </div>
                   ) : (
                     <div className="bg-gray-50 rounded flex items-center justify-center text-gray-300 text-xs w-full h-[100px]">{type.label}</div>
                   )}
                   <span className="text-[11px] italic text-gray-500 leading-tight">{type.label}</span>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="hidden md:flex gap-4 mb-6 justify-center flex-wrap">
-              {product.configInputTypes.map((type) => (
+              {product.configInputTypes.map((type) => {
+                const imgSrc = type.imageUrl
+                  ? storageUrl(type.imageUrl)
+                  : getProductConfigImage(product.slug, type.label);
+                return (
                 <div key={type.id} className="flex flex-col items-center gap-2 text-center w-[160px]">
-                  {type.imageUrl ? (
+                  {imgSrc ? (
                     <div className="flex items-center justify-center w-full h-[140px]">
-                      <img src={storageUrl(type.imageUrl)} alt={type.label} className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
+                      <img src={imgSrc} alt={type.label} className="max-h-full max-w-full object-contain" loading="lazy" decoding="async" />
                     </div>
                   ) : (
                     <div className="bg-gray-50 rounded flex items-center justify-center text-gray-300 text-xs w-full h-[140px]">{type.label}</div>
                   )}
                   <span className="text-[11px] italic text-gray-500 leading-tight">{type.label}</span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

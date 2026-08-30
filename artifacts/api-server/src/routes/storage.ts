@@ -20,8 +20,8 @@ const objectStorageService = new ObjectStorageService();
  * Request a presigned URL for file upload.
  * The client sends JSON metadata (name, size, contentType) — NOT the file.
  * Then uploads the file directly to the returned presigned URL.
- * Restricted to approved CRM staff (Clerk session) so public callers cannot
- * mint write-capable URLs.
+ * Restricted to approved CRM staff (session-authenticated) so public callers
+ * cannot mint write-capable URLs.
  */
 router.post(
   '/storage/uploads/request-url',
